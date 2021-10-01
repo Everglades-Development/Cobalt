@@ -1,0 +1,2 @@
+# Cobalt
+Cobalt programming language.
