@@ -1,10 +1,10 @@
-#include "tokenizer.hpp"
+#include "tokeniser.hpp"
 #include <map>
 #include <string>
 #include <cctype>
 #include <stack>
 #include <cstdlib>
-#include "push_back_stream.hpp"
+#include "pushBackStream.hpp"
 #include "errors.hpp"
 
 namespace cobalt {

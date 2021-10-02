@@ -2,8 +2,8 @@
 #include <vector>
 #include <cstdio>
 #include "errors.hpp"
-#include "push_back_stream.hpp"
-#include "tokenizer.hpp"
+#include "pushBackStream.hpp"
+#include "tokeniser.hpp"
 #include "compiler.hpp"
 
 namespace cobalt {

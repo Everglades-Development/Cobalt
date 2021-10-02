@@ -1,5 +1,5 @@
-#ifndef compiler_context_hpp
-#define compiler_context_hpp
+#ifndef compilerContext_hpp
+#define compilerContext_hpp
 
 #include <unordered_map>
 #include <memory>
@@ -126,4 +126,4 @@ namespace cobalt {
 	};
 }
 
-#endif /*compiler_context_hpp*/
+#endif /*compilerContext_hpp*/

@@ -1,7 +1,7 @@
-#include "expression_tree.hpp"
+#include "expressionTree.hpp"
 #include "helpers.hpp"
 #include "errors.hpp"
-#include "compiler_context.hpp"
+#include "compilerContext.hpp"
 
 namespace cobalt {
 	namespace {

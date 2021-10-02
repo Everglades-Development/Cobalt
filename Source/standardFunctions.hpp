@@ -1,5 +1,5 @@
-#ifndef standard_functions_hpp
-#define standard_functions_hpp
+#ifndef standardFunctions_hpp
+#define standardFunctions_hpp
 
 namespace cobalt {
 
@@ -12,4 +12,4 @@ namespace cobalt {
 	void add_standard_functions(module& m);
 }
 
-#endif /* standard_functions_hpp */
+#endif /* standardFunctions_hpp */

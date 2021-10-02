@@ -1,6 +1,6 @@
-#include "expression_tree_parser.hpp"
-#include "expression_tree.hpp"
-#include "tokenizer.hpp"
+#include "expressionTreeParser.hpp"
+#include "expressionTree.hpp"
+#include "tokeniser.hpp"
 #include "errors.hpp"
 #include <stack>
 

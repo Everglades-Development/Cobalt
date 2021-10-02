@@ -1,5 +1,5 @@
-#ifndef push_back_stream_h
-#define push_back_stream_h
+#ifndef pushBackStream_h
+#define pushBackStream_h
 #include <stack>
 #include <functional>
 
@@ -24,4 +24,4 @@ namespace cobalt {
 	};
 }
 
-#endif /* push_back_stream_h */
+#endif /* pushBackStream_h */

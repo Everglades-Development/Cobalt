@@ -1,5 +1,5 @@
-#ifndef tokenizer_hpp
-#define tokenizer_hpp
+#ifndef tokeniser_hpp
+#define tokeniser_hpp
 
 #include <functional>
 #include <string_view>
@@ -32,4 +32,4 @@ namespace cobalt {
 }
 
 
-#endif /* tokenizer_hpp */
+#endif /* tokeniser_hpp */

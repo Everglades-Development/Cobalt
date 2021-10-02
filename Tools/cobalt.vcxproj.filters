@@ -21,7 +21,7 @@
     <ClCompile Include="..\Source\compiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\compiler_context.cpp">
+    <ClCompile Include="..\Source\compilerContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\errors.cpp">
@@ -30,13 +30,13 @@
     <ClCompile Include="..\Source\expression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\expression_tree.cpp">
+    <ClCompile Include="..\Source\expressionTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\expression_tree_parser.cpp">
+    <ClCompile Include="..\Source\expressionTreeParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\incomplete_function.cpp">
+    <ClCompile Include="..\Source\incompleteFunction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\main.cpp">
@@ -45,19 +45,19 @@
     <ClCompile Include="..\Source\module.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\push_back_stream.cpp">
+    <ClCompile Include="..\Source\pushBackStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\runtime_context.cpp">
+    <ClCompile Include="..\Source\runtimeContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\standard_functions.cpp">
+    <ClCompile Include="..\Source\standardFunctions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\statement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\tokenizer.cpp">
+    <ClCompile Include="..\Source\tokeniser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\tokens.cpp">
@@ -74,7 +74,7 @@
     <ClInclude Include="..\Source\compiler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\compiler_context.hpp">
+    <ClInclude Include="..\Source\compilerContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\errors.hpp">
@@ -83,16 +83,16 @@
     <ClInclude Include="..\Source\expression.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\expression_tree.hpp">
+    <ClInclude Include="..\Source\expressionTree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\expression_tree_parser.hpp">
+    <ClInclude Include="..\Source\expressionTreeParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\helpers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\incomplete_function.hpp">
+    <ClInclude Include="..\Source\incompleteFunction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\lookup.hpp">
@@ -101,19 +101,19 @@
     <ClInclude Include="..\Source\module.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\push_back_stream.hpp">
+    <ClInclude Include="..\Source\pushBackStream.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\runtime_context.hpp">
+    <ClInclude Include="..\Source\runtimeContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\standard_functions.hpp">
+    <ClInclude Include="..\Source\standardFunctions.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\statement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\tokenizer.hpp">
+    <ClInclude Include="..\Source\tokeniser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\tokens.hpp">

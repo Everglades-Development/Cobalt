@@ -1,12 +1,12 @@
 #include "compiler.hpp"
 #include "errors.hpp"
-#include "compiler_context.hpp"
+#include "compilerContext.hpp"
 #include "expression.hpp"
-#include "incomplete_function.hpp"
-#include "tokenizer.hpp"
-#include "runtime_context.hpp"
+#include "incompleteFunction.hpp"
+#include "tokeniser.hpp"
+#include "runtimeContext.hpp"
 #include "helpers.hpp"
-#include "push_back_stream.hpp"
+#include "pushBackStream.hpp"
 
 namespace cobalt {
 	namespace {

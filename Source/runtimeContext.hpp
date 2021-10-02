@@ -1,5 +1,5 @@
-#ifndef runtime_context_hpp
-#define runtime_context_hpp
+#ifndef runtimeContext_hpp
+#define runtimeContext_hpp
 #include <variant>
 #include <vector>
 #include <deque>
@@ -52,4 +52,4 @@ namespace cobalt {
 	};
 }
 
-#endif /*runtime_context_hpp*/
+#endif /*runtimeContext_hpp*/

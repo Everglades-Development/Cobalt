@@ -1,5 +1,5 @@
-#ifndef expression_tree_hpp
-#define expression_tree_hpp
+#ifndef expressionTree_hpp
+#define expressionTree_hpp
 #include <memory>
 #include <variant>
 #include <vector>
@@ -108,4 +108,4 @@ namespace cobalt {
 
 }
 
-#endif /* expression_tree_hpp */
+#endif /* expressionTree_hpp */

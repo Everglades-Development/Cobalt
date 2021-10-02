@@ -1,5 +1,5 @@
-#ifndef expression_tree_parser_hpp
-#define expression_tree_parser_hpp
+#ifndef expressionTreeParser_hpp
+#define expressionTreeParser_hpp
 
 #include <memory>
 
@@ -16,4 +16,4 @@ namespace cobalt {
 	node_ptr parse_expression_tree(compiler_context& context, tokens_iterator& it, type_handle type_id, bool allow_comma);
 }
 
-#endif /* expression_tree_parser_hpp */
+#endif /* expressionTreeParser_hpp */

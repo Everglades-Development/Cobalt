@@ -20,39 +20,39 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\compiler.cpp" />
-    <ClCompile Include="..\Source\compiler_context.cpp" />
+    <ClCompile Include="..\Source\compilerContext.cpp" />
     <ClCompile Include="..\Source\errors.cpp" />
     <ClCompile Include="..\Source\expression.cpp" />
-    <ClCompile Include="..\Source\expression_tree.cpp" />
-    <ClCompile Include="..\Source\expression_tree_parser.cpp" />
-    <ClCompile Include="..\Source\incomplete_function.cpp" />
+    <ClCompile Include="..\Source\expressionTree.cpp" />
+    <ClCompile Include="..\Source\expressionTreeParser.cpp" />
+    <ClCompile Include="..\Source\incompleteFunction.cpp" />
     <ClCompile Include="..\Source\main.cpp" />
     <ClCompile Include="..\Source\module.cpp" />
-    <ClCompile Include="..\Source\push_back_stream.cpp" />
-    <ClCompile Include="..\Source\runtime_context.cpp" />
-    <ClCompile Include="..\Source\standard_functions.cpp" />
+    <ClCompile Include="..\Source\pushBackStream.cpp" />
+    <ClCompile Include="..\Source\runtimeContext.cpp" />
+    <ClCompile Include="..\Source\standardFunctions.cpp" />
     <ClCompile Include="..\Source\statement.cpp" />
-    <ClCompile Include="..\Source\tokenizer.cpp" />
+    <ClCompile Include="..\Source\tokeniser.cpp" />
     <ClCompile Include="..\Source\tokens.cpp" />
     <ClCompile Include="..\Source\types.cpp" />
     <ClCompile Include="..\Source\variable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\compiler.hpp" />
-    <ClInclude Include="..\Source\compiler_context.hpp" />
+    <ClInclude Include="..\Source\compilerContext.hpp" />
     <ClInclude Include="..\Source\errors.hpp" />
     <ClInclude Include="..\Source\expression.hpp" />
-    <ClInclude Include="..\Source\expression_tree.hpp" />
-    <ClInclude Include="..\Source\expression_tree_parser.hpp" />
+    <ClInclude Include="..\Source\expressionTree.hpp" />
+    <ClInclude Include="..\Source\expressionTreeParser.hpp" />
     <ClInclude Include="..\Source\helpers.hpp" />
-    <ClInclude Include="..\Source\incomplete_function.hpp" />
+    <ClInclude Include="..\Source\incompleteFunction.hpp" />
     <ClInclude Include="..\Source\lookup.hpp" />
     <ClInclude Include="..\Source\module.hpp" />
-    <ClInclude Include="..\Source\push_back_stream.hpp" />
-    <ClInclude Include="..\Source\runtime_context.hpp" />
-    <ClInclude Include="..\Source\standard_functions.hpp" />
+    <ClInclude Include="..\Source\pushBackStream.hpp" />
+    <ClInclude Include="..\Source\runtimeContext.hpp" />
+    <ClInclude Include="..\Source\standardFunctions.hpp" />
     <ClInclude Include="..\Source\statement.hpp" />
-    <ClInclude Include="..\Source\tokenizer.hpp" />
+    <ClInclude Include="..\Source\tokeniser.hpp" />
     <ClInclude Include="..\Source\tokens.hpp" />
     <ClInclude Include="..\Source\types.hpp" />
     <ClInclude Include="..\Source\variable.hpp" />

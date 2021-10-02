@@ -1,5 +1,5 @@
-#ifndef incomplete_function_hpp
-#define incomplete_function_hpp
+#ifndef incompleteFunction_hpp
+#define incompleteFunction_hpp
 
 #include "tokens.hpp"
 #include "types.hpp"
@@ -36,4 +36,4 @@ namespace cobalt {
 	};
 }
 
-#endif /* incomplete_function_hpp */
+#endif /* incompleteFunction_hpp */

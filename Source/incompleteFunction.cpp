@@ -1,8 +1,8 @@
-#include "incomplete_function.hpp"
+#include "incompleteFunction.hpp"
 #include "compiler.hpp"
-#include "compiler_context.hpp"
+#include "compilerContext.hpp"
 #include "errors.hpp"
-#include "tokenizer.hpp"
+#include "tokeniser.hpp"
 
 namespace cobalt {
 	function_declaration parse_function_declaration(compiler_context& ctx, tokens_iterator& it) {
