@@ -44,7 +44,4 @@ public function void main() {
 	
 	trace(tostring(arr));
 	
-	sort(&arr, greater);
-	
-	trace(tostring(arr));
 }
