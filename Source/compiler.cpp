@@ -11,51 +11,51 @@
 namespace cobalt {
 	namespace {
 		struct possible_flow {
-			size_t break_level;
+			size_t breakLevel;
 			bool can_continue;
-			type_handle return_type_id;
+			typeHandle return_type_id;
 			
 			possible_flow add_switch() {
-				return possible_flow{break_level+1, can_continue, return_type_id};
+				return possible_flow{breakLevel+1, can_continue, return_type_id};
 			}
 			
 			possible_flow add_loop() {
-				return possible_flow{break_level+1, true, return_type_id};
+				return possible_flow{breakLevel+1, true, return_type_id};
 			}
 			
-			static possible_flow in_function(type_handle return_type_id) {
+			static possible_flow in_function(typeHandle return_type_id) {
 				return possible_flow{0, false, return_type_id};
 			}
 		};
 	
-		bool is_typename(const compiler_context&, const tokens_iterator& it) {
+		bool is_typename(const compilerContext&, const tokensIterator& it) {
 			return std::visit(overloaded{
-				[](reserved_token t) {
+				[](reservedToken t) {
 					switch (t) {
-						case reserved_token::kw_number:
-						case reserved_token::kw_string:
-						case reserved_token::kw_void:
-						case reserved_token::open_square:
+						case reservedToken::kw_number:
+						case reservedToken::kw_string:
+						case reservedToken::kw_void:
+						case reservedToken::open_square:
 							return true;
 						default:
 							return false;
 					}
 				},
-				[](const token_value&) {
+				[](const tokenValue&) {
 					return false;
 				}
-			}, it->get_value());
+			}, it->getValue());
 		}
 	
-		error unexpected_syntax(const tokens_iterator& it) {
-			return unexpected_syntax_error(std::to_string(it->get_value()), it->get_line_number(), it->get_char_index());
+		error unexpected_syntax(const tokensIterator& it) {
+			return unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
 		}
 		
-		std::vector<expression<lvalue>::ptr> compile_variable_declaration(compiler_context& ctx, tokens_iterator& it) {
-			type_handle type_id = parse_type(ctx, it);
+		std::vector<expression<lvalue>::ptr> compile_variable_declaration(compilerContext& ctx, tokensIterator& it) {
+			typeHandle typeID = parseType(ctx, it);
 		
-			if (type_id == type_registry::get_void_handle()) {
-				throw syntax_error("Cannot declare void variable", it->get_line_number(), it->get_char_index());
+			if (typeID == typeRegistry::getVoidHandle()) {
+				throw syntaxError("Cannot declare void variable", it->getLineNumber(), it->getCharIndex());
 			}
 			
 			std::vector<expression<lvalue>::ptr> ret;
@@ -65,65 +65,65 @@ namespace cobalt {
 					++it;
 				}
 			
-				std::string name = parse_declaration_name(ctx, it);
+				std::string name = parseDeclarationName(ctx, it);
 			
-				if (it->has_value(reserved_token::open_round)) {
+				if (it->hasValue(reservedToken::open_round)) {
 					++it;
-					ret.emplace_back(build_initialization_expression(ctx, it, type_id, false));
-					parse_token_value(ctx, it, reserved_token::close_round);
-				} else if (it->has_value(reserved_token::assign)) {
+					ret.emplace_back(build_initialisation_expression(ctx, it, typeID, false));
+					parseTokenValue(ctx, it, reservedToken::close_round);
+				} else if (it->hasValue(reservedToken::assign)) {
 					++it;
-					ret.emplace_back(build_initialization_expression(ctx, it, type_id, false));
+					ret.emplace_back(build_initialisation_expression(ctx, it, typeID, false));
 				} else {
-					ret.emplace_back(build_default_initialization(type_id));
+					ret.emplace_back(build_default_initialization(typeID));
 				}
 				
-				ctx.create_identifier(std::move(name), type_id);
-			} while (it->has_value(reserved_token::comma));
+				ctx.createIdentifier(std::move(name), typeID);
+			} while (it->hasValue(reservedToken::comma));
 			
 			return ret;
 		}
 		
-		statement_ptr compile_simple_statement(compiler_context& ctx, tokens_iterator& it);
+		statement_ptr compile_simple_statement(compilerContext& ctx, tokensIterator& it);
 		
-		statement_ptr compile_block_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf);
+		statement_ptr compile_block_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf);
 		
-		statement_ptr compile_for_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf);
+		statement_ptr compile_for_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf);
 		
-		statement_ptr compile_while_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf);
+		statement_ptr compile_while_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf);
 		
-		statement_ptr compile_do_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf);
+		statement_ptr compile_do_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf);
 		
-		statement_ptr compile_if_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf);
+		statement_ptr compile_if_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf);
 		
-		statement_ptr compile_switch_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf);
+		statement_ptr compile_switch_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf);
 		
-		statement_ptr compile_var_statement(compiler_context& ctx, tokens_iterator& it);
+		statement_ptr compile_var_statement(compilerContext& ctx, tokensIterator& it);
 		
-		statement_ptr compile_break_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf);
+		statement_ptr compile_break_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf);
 		
-		statement_ptr compile_continue_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf);
+		statement_ptr compile_continue_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf);
 		
-		statement_ptr compile_return_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf);
+		statement_ptr compile_return_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf);
 		
-		statement_ptr compile_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf, bool in_switch) {
-			if (it->is_reserved_token()) {
-				switch (it->get_reserved_token()) {
-					case reserved_token::kw_for:
+		statement_ptr compile_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf, bool in_switch) {
+			if (it->isReservedToken()) {
+				switch (it->getReservedToken()) {
+					case reservedToken::kw_for:
 						return compile_for_statement(ctx, it, pf.add_loop());
-					case reserved_token::kw_while:
+					case reservedToken::kw_while:
 						return compile_while_statement(ctx, it, pf.add_loop());
-					case reserved_token::kw_do:
+					case reservedToken::kw_do:
 						return compile_do_statement(ctx, it, pf.add_loop());
-					case reserved_token::kw_if:
+					case reservedToken::kw_if:
 						return compile_if_statement(ctx, it, pf);
-					case reserved_token::kw_switch:
+					case reservedToken::kw_switch:
 						return compile_switch_statement(ctx, it, pf.add_switch());
-					case reserved_token::kw_break:
+					case reservedToken::kw_break:
 						return compile_break_statement(ctx, it, pf);
-					case reserved_token::kw_continue:
+					case reservedToken::kw_continue:
 						return compile_continue_statement(ctx, it, pf);
-					case reserved_token::kw_return:
+					case reservedToken::kw_return:
 						return compile_return_statement(ctx, it, pf);
 					default:
 						break;
@@ -132,30 +132,30 @@ namespace cobalt {
 			
 			if (is_typename(ctx, it)) {
 				if (in_switch) {
-					throw syntax_error("Declarations in switch block are not allowed", it->get_line_number(), it->get_char_index());
+					throw syntaxError("Declarations in switch block are not allowed", it->getLineNumber(), it->getCharIndex());
 				} else {
 					return compile_var_statement(ctx, it);
 				}
 			}
 			
-			if (it->has_value(reserved_token::open_curly)) {
+			if (it->hasValue(reservedToken::open_curly)) {
 				return compile_block_statement(ctx, it, pf);
 			}
 			
 			return compile_simple_statement(ctx, it);
 		}
 		
-		statement_ptr compile_simple_statement(compiler_context& ctx, tokens_iterator& it) {
-			statement_ptr ret = create_simple_statement(build_void_expression(ctx, it));
-			parse_token_value(ctx, it, reserved_token::semicolon);
+		statement_ptr compile_simple_statement(compilerContext& ctx, tokensIterator& it) {
+			statement_ptr ret = createSimpleStatement(build_void_expression(ctx, it));
+			parseTokenValue(ctx, it, reservedToken::semicolon);
 			return ret;
 		}
 		
-		statement_ptr compile_for_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf) {
+		statement_ptr compile_for_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf) {
 			auto _ = ctx.scope();
 		
-			parse_token_value(ctx, it, reserved_token::kw_for);
-			parse_token_value(ctx, it, reserved_token::open_round);
+			parseTokenValue(ctx, it, reservedToken::kw_for);
+			parseTokenValue(ctx, it, reservedToken::open_round);
 			
 			std::vector<expression<lvalue>::ptr> decls;
 			expression<void>::ptr expr1;
@@ -166,122 +166,122 @@ namespace cobalt {
 				expr1 = build_void_expression(ctx, it);
 			}
 		
-			parse_token_value(ctx, it, reserved_token::semicolon);
+			parseTokenValue(ctx, it, reservedToken::semicolon);
 			
 			expression<number>::ptr expr2 = build_number_expression(ctx, it);
-			parse_token_value(ctx, it, reserved_token::semicolon);
+			parseTokenValue(ctx, it, reservedToken::semicolon);
 			
 			expression<void>::ptr expr3 = build_void_expression(ctx, it);
-			parse_token_value(ctx, it, reserved_token::close_round);
+			parseTokenValue(ctx, it, reservedToken::close_round);
 			
 			statement_ptr block = compile_block_statement(ctx, it, pf);
 			
 			if (!decls.empty()) {
-				return create_for_statement(std::move(decls), std::move(expr2), std::move(expr3), std::move(block));
+				return createForStatement(std::move(decls), std::move(expr2), std::move(expr3), std::move(block));
 			} else {
-				return create_for_statement(std::move(expr1), std::move(expr2), std::move(expr3), std::move(block));
+				return createForStatement(std::move(expr1), std::move(expr2), std::move(expr3), std::move(block));
 			}
 		}
 		
-		statement_ptr compile_while_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf) {
-			parse_token_value(ctx, it, reserved_token::kw_while);
+		statement_ptr compile_while_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf) {
+			parseTokenValue(ctx, it, reservedToken::kw_while);
 
-			parse_token_value(ctx, it, reserved_token::open_round);
+			parseTokenValue(ctx, it, reservedToken::open_round);
 			expression<number>::ptr expr = build_number_expression(ctx, it);
-			parse_token_value(ctx, it, reserved_token::close_round);
+			parseTokenValue(ctx, it, reservedToken::close_round);
 			
 			statement_ptr block = compile_block_statement(ctx, it, pf);
 			
-			return create_while_statement(std::move(expr), std::move(block));
+			return createWhileStatement(std::move(expr), std::move(block));
 		}
 		
-		statement_ptr compile_do_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf) {
-			parse_token_value(ctx, it, reserved_token::kw_do);
+		statement_ptr compile_do_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf) {
+			parseTokenValue(ctx, it, reservedToken::kw_do);
 			
 			statement_ptr block = compile_block_statement(ctx, it, pf);
 			
-			parse_token_value(ctx, it, reserved_token::kw_while);
+			parseTokenValue(ctx, it, reservedToken::kw_while);
 			
-			parse_token_value(ctx, it, reserved_token::open_round);
+			parseTokenValue(ctx, it, reservedToken::open_round);
 			expression<number>::ptr expr = build_number_expression(ctx, it);
-			parse_token_value(ctx, it, reserved_token::close_round);
+			parseTokenValue(ctx, it, reservedToken::close_round);
 			
-			return create_do_statement(std::move(expr), std::move(block));
+			return createDoStatement(std::move(expr), std::move(block));
 		}
 		
-		statement_ptr compile_if_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf) {
+		statement_ptr compile_if_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf) {
 			auto _ = ctx.scope();
-			parse_token_value(ctx, it, reserved_token::kw_if);
+			parseTokenValue(ctx, it, reservedToken::kw_if);
 			
-			parse_token_value(ctx, it, reserved_token::open_round);
+			parseTokenValue(ctx, it, reservedToken::open_round);
 			
 			std::vector<expression<lvalue>::ptr> decls;
 			
 			if (is_typename(ctx, it)) {
 				decls = compile_variable_declaration(ctx, it);
-				parse_token_value(ctx, it, reserved_token::semicolon);
+				parseTokenValue(ctx, it, reservedToken::semicolon);
 			}
 			
 			std::vector<expression<number>::ptr> exprs;
 			std::vector<statement_ptr> stmts;
 			
 			exprs.emplace_back(build_number_expression(ctx, it));
-			parse_token_value(ctx, it, reserved_token::close_round);
+			parseTokenValue(ctx, it, reservedToken::close_round);
 			stmts.emplace_back(compile_block_statement(ctx, it, pf));
 			
-			while (it->has_value(reserved_token::kw_elif)) {
+			while (it->hasValue(reservedToken::kw_elif)) {
 				++it;
-				parse_token_value(ctx, it, reserved_token::open_round);
+				parseTokenValue(ctx, it, reservedToken::open_round);
 				exprs.emplace_back(build_number_expression(ctx, it));
-				parse_token_value(ctx, it, reserved_token::close_round);
+				parseTokenValue(ctx, it, reservedToken::close_round);
 				stmts.emplace_back(compile_block_statement(ctx, it, pf));
 			}
 			
-			if (it->has_value(reserved_token::kw_else)) {
+			if (it->hasValue(reservedToken::kw_else)) {
 				++it;
 				stmts.emplace_back(compile_block_statement(ctx, it, pf));
 			} else {
-				stmts.emplace_back(create_block_statement({}));
+				stmts.emplace_back(createBlockStatement({}));
 			}
 			
-			return create_if_statement(std::move(decls), std::move(exprs), std::move(stmts));
+			return createIfStatement(std::move(decls), std::move(exprs), std::move(stmts));
 		}
 		
-		 statement_ptr compile_switch_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf) {
+		 statement_ptr compile_switch_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf) {
 		 	auto _ = ctx.scope();
-			parse_token_value(ctx, it, reserved_token::kw_switch);
+			parseTokenValue(ctx, it, reservedToken::kw_switch);
 			
-			parse_token_value(ctx, it, reserved_token::open_round);
+			parseTokenValue(ctx, it, reservedToken::open_round);
 			
 			std::vector<expression<lvalue>::ptr> decls;
 			
 			if (is_typename(ctx, it)) {
 				decls = compile_variable_declaration(ctx, it);
-				parse_token_value(ctx, it, reserved_token::semicolon);
+				parseTokenValue(ctx, it, reservedToken::semicolon);
 			}
 			
 			expression<number>::ptr expr = build_number_expression(ctx, it);
-			parse_token_value(ctx, it, reserved_token::close_round);
+			parseTokenValue(ctx, it, reservedToken::close_round);
 			
 			std::vector<statement_ptr> stmts;
 			std::unordered_map<number, size_t> cases;
 			size_t dflt = size_t(-1);
 			
-			parse_token_value(ctx, it, reserved_token::open_curly);
+			parseTokenValue(ctx, it, reservedToken::open_curly);
 			
-			while (!it->has_value(reserved_token::close_curly)) {
-				if (it->has_value(reserved_token::kw_case)) {
+			while (!it->hasValue(reservedToken::close_curly)) {
+				if (it->hasValue(reservedToken::kw_case)) {
 					++it;
-					if (!it->is_number()) {
+					if (!it->isNumber()) {
 						throw unexpected_syntax(it);
 					}
-					cases.emplace(it->get_number(), stmts.size());
+					cases.emplace(it->getNumber(), stmts.size());
 					++it;
-					parse_token_value(ctx, it, reserved_token::colon);
-				} else if (it->has_value(reserved_token::kw_default)) {
+					parseTokenValue(ctx, it, reservedToken::colon);
+				} else if (it->hasValue(reservedToken::kw_default)) {
 					++it;
 					dflt = stmts.size();
-					parse_token_value(ctx, it, reserved_token::colon);
+					parseTokenValue(ctx, it, reservedToken::colon);
 				} else {
 					stmts.emplace_back(compile_statement(ctx, it, pf, true));
 				}
@@ -293,76 +293,76 @@ namespace cobalt {
 				dflt = stmts.size();
 			}
 			
-			return create_switch_statement(std::move(decls), std::move(expr), std::move(stmts), std::move(cases), dflt);
+			return createSwitchStatement(std::move(decls), std::move(expr), std::move(stmts), std::move(cases), dflt);
 		}
 	
-		statement_ptr compile_var_statement(compiler_context& ctx, tokens_iterator& it) {
+		statement_ptr compile_var_statement(compilerContext& ctx, tokensIterator& it) {
 			std::vector<expression<lvalue>::ptr> decls = compile_variable_declaration(ctx, it);
-			parse_token_value(ctx, it, reserved_token::semicolon);
-			return create_local_declaration_statement(std::move(decls));
+			parseTokenValue(ctx, it, reservedToken::semicolon);
+			return createLocalDeclarationState(std::move(decls));
 		}
 		
-		statement_ptr compile_break_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf) {
-			if (pf.break_level == 0) {
+		statement_ptr compile_break_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf) {
+			if (pf.breakLevel == 0) {
 				throw unexpected_syntax(it);
 			}
 			
-			parse_token_value(ctx, it, reserved_token::kw_break);
+			parseTokenValue(ctx, it, reservedToken::kw_break);
 			
-			double break_level;
+			double breakLevel;
 			
-			if (it->is_number()) {
-				break_level = it->get_number();
+			if (it->isNumber()) {
+				breakLevel = it->getNumber();
 			
-				if (break_level < 1 || break_level != int(break_level) || break_level > pf.break_level) {
-					throw syntax_error("Invalid break value", it->get_line_number(), it->get_char_index());
+				if (breakLevel < 1 || breakLevel != int(breakLevel) || breakLevel > pf.breakLevel) {
+					throw syntaxError("Invalid break value", it->getLineNumber(), it->getCharIndex());
 				}
 				
 				++it;
 			} else {
-				break_level = 1;
+				breakLevel = 1;
 			}
 			
 			
-			parse_token_value(ctx, it, reserved_token::semicolon);
+			parseTokenValue(ctx, it, reservedToken::semicolon);
 			
-			return create_break_statement(int(break_level));
+			return createBreakStatement(int(breakLevel));
 		}
 		
-		statement_ptr compile_continue_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf){
+		statement_ptr compile_continue_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf){
 			if (!pf.can_continue) {
 				throw unexpected_syntax(it);
 			}
-			parse_token_value(ctx, it, reserved_token::kw_continue);
-			parse_token_value(ctx, it, reserved_token::semicolon);
-			return create_continue_statement();
+			parseTokenValue(ctx, it, reservedToken::kw_continue);
+			parseTokenValue(ctx, it, reservedToken::semicolon);
+			return createContinueStatement();
 		}
 		
-		statement_ptr compile_return_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf){
-			parse_token_value(ctx, it, reserved_token::kw_return);
+		statement_ptr compile_return_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf){
+			parseTokenValue(ctx, it, reservedToken::kw_return);
 			
-			if (pf.return_type_id == type_registry::get_void_handle()) {
-				parse_token_value(ctx, it, reserved_token::semicolon);
-				return create_return_void_statement();
+			if (pf.return_type_id == typeRegistry::getVoidHandle()) {
+				parseTokenValue(ctx, it, reservedToken::semicolon);
+				return createReturnVoidStatement();
 			} else {
-				expression<lvalue>::ptr expr = build_initialization_expression(ctx, it, pf.return_type_id, true);
-				parse_token_value(ctx, it, reserved_token::semicolon);
-				return create_return_statement(std::move(expr));
+				expression<lvalue>::ptr expr = build_initialisation_expression(ctx, it, pf.return_type_id, true);
+				parseTokenValue(ctx, it, reservedToken::semicolon);
+				return createReturnStatement(std::move(expr));
 			}
 		}
 		
 		
-		std::vector<statement_ptr> compile_block_contents(compiler_context& ctx, tokens_iterator& it, possible_flow pf) {
+		std::vector<statement_ptr> compile_block_contents(compilerContext& ctx, tokensIterator& it, possible_flow pf) {
 			std::vector<statement_ptr> ret;
 			
-			if (it->has_value(reserved_token::open_curly)) {
-				parse_token_value(ctx, it, reserved_token::open_curly);
+			if (it->hasValue(reservedToken::open_curly)) {
+				parseTokenValue(ctx, it, reservedToken::open_curly);
 				
-				while (!it->has_value(reserved_token::close_curly)) {
+				while (!it->hasValue(reservedToken::close_curly)) {
 					ret.push_back(compile_statement(ctx, it, pf, false));
 				}
 				
-				parse_token_value(ctx, it, reserved_token::close_curly);
+				parseTokenValue(ctx, it, reservedToken::close_curly);
 			} else {
 				ret.push_back(compile_statement(ctx, it, pf, false));
 			}
@@ -370,30 +370,30 @@ namespace cobalt {
 			return ret;
 		}
 		
-		statement_ptr compile_block_statement(compiler_context& ctx, tokens_iterator& it, possible_flow pf) {
+		statement_ptr compile_block_statement(compilerContext& ctx, tokensIterator& it, possible_flow pf) {
 			auto _ = ctx.scope();
 			std::vector<statement_ptr> block = compile_block_contents(ctx, it, pf);
-			return create_block_statement(std::move(block));
+			return createBlockStatement(std::move(block));
 		}
 	}
 
-	void parse_token_value(compiler_context&, tokens_iterator& it, const token_value& value) {
-		if (it->has_value(value)) {
+	void parseTokenValue(compilerContext&, tokensIterator& it, const tokenValue& value) {
+		if (it->hasValue(value)) {
 			++it;
 			return;
 		}
-		throw expected_syntax_error(std::to_string(value), it->get_line_number(), it->get_char_index());
+		throw expectedSyntaxError(std::to_string(value), it->getLineNumber(), it->getCharIndex());
 	}
 	
-	std::string parse_declaration_name(compiler_context& ctx, tokens_iterator& it) {
-		if (!it->is_identifier()) {
+	std::string parseDeclarationName(compilerContext& ctx, tokensIterator& it) {
+		if (!it->isIdentifier()) {
 			throw unexpected_syntax(it);
 		}
 
-		std::string ret = it->get_identifier().name;
+		std::string ret = it->getIdentifier().name;
 		
-		if (!ctx.can_declare(ret)) {
-			throw already_declared_error(ret, it->get_line_number(), it->get_char_index());
+		if (!ctx.canDeclare(ret)) {
+			throw alreadyDeclaredError(ret, it->getLineNumber(), it->getCharIndex());
 		}
 
 		++it;
@@ -401,61 +401,61 @@ namespace cobalt {
 		return ret;
 	}
 
-	type_handle parse_type(compiler_context& ctx, tokens_iterator& it) {
-		if (!it->is_reserved_token()) {
+	typeHandle parseType(compilerContext& ctx, tokensIterator& it) {
+		if (!it->isReservedToken()) {
 			throw unexpected_syntax(it);
 		}
 		
-		type_handle t = nullptr;
+		typeHandle t = nullptr;
 		
-		switch (it->get_reserved_token()) {
-			case reserved_token::kw_void:
-				t = ctx.get_handle(simple_type::nothing);
+		switch (it->getReservedToken()) {
+			case reservedToken::kw_void:
+				t = ctx.getHandle(simpleType::nothing);
 				++it;
 				break;
-			case reserved_token::kw_number:
-				t = ctx.get_handle(simple_type::number);
+			case reservedToken::kw_number:
+				t = ctx.getHandle(simpleType::number);
 				++it;
 				break;
-			case reserved_token::kw_string:
-				t = ctx.get_handle(simple_type::string);
+			case reservedToken::kw_string:
+				t = ctx.getHandle(simpleType::string);
 				++it;
 				break;
-			case reserved_token::open_square:
+			case reservedToken::open_square:
 				{
-					tuple_type tt;
+					tupleType tt;
 					++it;
-					while (!it->has_value(reserved_token::close_square)) {
+					while (!it->hasValue(reservedToken::close_square)) {
 						if (!tt.inner_type_id.empty()) {
-							parse_token_value(ctx, it, reserved_token::comma);
+							parseTokenValue(ctx, it, reservedToken::comma);
 						}
-						tt.inner_type_id.push_back(parse_type(ctx, it));
+						tt.inner_type_id.push_back(parseType(ctx, it));
 					}
 					++it;
-					t = ctx.get_handle(std::move(tt));
+					t = ctx.getHandle(std::move(tt));
 				}
 				break;
 			default:
 				throw unexpected_syntax(it);
 		}
 		
-		while (it->is_reserved_token()) {
-			switch (it->get_reserved_token()) {
-				case reserved_token::open_square:
-					parse_token_value(ctx, ++it, reserved_token::close_square);
-					t = ctx.get_handle(array_type{t});
+		while (it->isReservedToken()) {
+			switch (it->getReservedToken()) {
+				case reservedToken::open_square:
+					parseTokenValue(ctx, ++it, reservedToken::close_square);
+					t = ctx.getHandle(arrayType{t});
 					break;
-				case reserved_token::open_round:
+				case reservedToken::open_round:
 					{
-						function_type ft;
+						functionType ft;
 						ft.return_type_id = t;
 						++it;
-						while (!it->has_value(reserved_token::close_round)) {
+						while (!it->hasValue(reservedToken::close_round)) {
 							if (!ft.param_type_id.empty()) {
-								parse_token_value(ctx, it, reserved_token::comma);
+								parseTokenValue(ctx, it, reservedToken::comma);
 							}
-							type_handle param_type = parse_type(ctx, it);
-							if (it->has_value(reserved_token::bitwise_and)) {
+							typeHandle param_type = parseType(ctx, it);
+							if (it->hasValue(reservedToken::bitwise_and)) {
 								ft.param_type_id.push_back({param_type, true});
 								++it;
 							} else {
@@ -463,7 +463,7 @@ namespace cobalt {
 							}
 						}
 						++it;
-						t = ctx.get_handle(ft);
+						t = ctx.getHandle(ft);
 					}
 					break;
 				default:
@@ -474,20 +474,20 @@ namespace cobalt {
 		return t;
 	}
 	
-	shared_statement_ptr compile_function_block(compiler_context& ctx, tokens_iterator& it, type_handle return_type_id) {
+	shared_statement_ptr compileFunctionBlock(compilerContext& ctx, tokensIterator& it, typeHandle return_type_id) {
 		std::vector<statement_ptr> block = compile_block_contents(ctx, it, possible_flow::in_function(return_type_id));
-		if (return_type_id != type_registry::get_void_handle()) {
-			block.emplace_back(create_return_statement(build_default_initialization(return_type_id)));
+		if (return_type_id != typeRegistry::getVoidHandle()) {
+			block.emplace_back(createReturnStatement(build_default_initialization(return_type_id)));
 		}
-		return create_shared_block_statement(std::move(block));
+		return createSharedBlockStatement(std::move(block));
 	}
 	
-	runtime_context compile(
-		tokens_iterator& it,
+	runtimeContext compile(
+		tokensIterator& it,
 		const std::vector<std::pair<std::string, function> >& external_functions,
 		std::vector<std::string> public_declarations
 	) {
-		compiler_context ctx;
+		compilerContext ctx;
 		
 		for (const std::pair<std::string, function>& p : external_functions) {
 			get_character get = [i = 0, &p]() mutable {
@@ -500,14 +500,14 @@ namespace cobalt {
 			
 			push_back_stream stream(&get);
 			
-			tokens_iterator function_it(stream);
+			tokensIterator function_it(stream);
 		
-			function_declaration decl = parse_function_declaration(ctx, function_it);
+			functionDeclaration decl = parseFunctionDeclaration(ctx, function_it);
 			
-			ctx.create_function(decl.name, decl.type_id);
+			ctx.createFunction(decl.name, decl.typeID);
 		}
 		
-		std::unordered_map<std::string, type_handle> public_function_types;
+		std::unordered_map<std::string, typeHandle> public_function_types;
 		
 		for (const std::string& f : public_declarations) {
 			get_character get = [i = 0, &f]() mutable {
@@ -520,52 +520,52 @@ namespace cobalt {
 			
 			push_back_stream stream(&get);
 			
-			tokens_iterator function_it(stream);
+			tokensIterator function_it(stream);
 		
-			function_declaration decl = parse_function_declaration(ctx, function_it);
+			functionDeclaration decl = parseFunctionDeclaration(ctx, function_it);
 			
-			public_function_types.emplace(decl.name, decl.type_id);
+			public_function_types.emplace(decl.name, decl.typeID);
 		}
 
 		std::vector<expression<lvalue>::ptr> initializers;
 		
-		std::vector<incomplete_function> incomplete_functions;
+		std::vector<incompleteFunction> incomplete_functions;
 		std::unordered_map<std::string, size_t> public_functions;
 		
 		while (it) {
-			if (!std::holds_alternative<reserved_token>(it->get_value())) {
+			if (!std::holds_alternative<reservedToken>(it->getValue())) {
 				throw unexpected_syntax(it);
 			}
 		
 			bool public_function = false;
 			
-			switch (it->get_reserved_token()) {
-				case reserved_token::kw_public:
+			switch (it->getReservedToken()) {
+				case reservedToken::kw_public:
 					public_function = true;
-					if (!(++it)->has_value(reserved_token::kw_function)) {
+					if (!(++it)->hasValue(reservedToken::kw_function)) {
 						throw unexpected_syntax(it);
 					}
-				case reserved_token::kw_function:
+				case reservedToken::kw_function:
 					{
-						size_t line_number = it->get_line_number();
-						size_t char_index = it->get_char_index();
-						const incomplete_function& f = incomplete_functions.emplace_back(ctx, it);
+						size_t lineNumber = it->getLineNumber();
+						size_t charIndex = it->getCharIndex();
+						const incompleteFunction& f = incomplete_functions.emplace_back(ctx, it);
 						
 						if (public_function) {
-							auto it = public_function_types.find(f.get_decl().name);
+							auto it = public_function_types.find(f.getDecl().name);
 						
-							if (it != public_function_types.end() && it->second != f.get_decl().type_id) {
-								throw semantic_error(
+							if (it != public_function_types.end() && it->second != f.getDecl().typeID) {
+								throw semanticError(
 									"Public function doesn't match it's declaration " + std::to_string(it->second),
-									line_number,
-									char_index
+									lineNumber,
+									charIndex
 								);
 							} else {
 								public_function_types.erase(it);
 							}
 						
 							public_functions.emplace(
-								f.get_decl().name,
+								f.getDecl().name,
 								external_functions.size() + incomplete_functions.size() - 1
 							);
 						}
@@ -575,16 +575,16 @@ namespace cobalt {
 					for (expression<lvalue>::ptr& expr : compile_variable_declaration(ctx, it)) {
 						initializers.push_back(std::move(expr));
 					}
-					parse_token_value(ctx, it, reserved_token::semicolon);
+					parseTokenValue(ctx, it, reservedToken::semicolon);
 					break;
 			}
 		}
 		
 		if (!public_function_types.empty()) {
-			throw semantic_error(
+			throw semanticError(
 				"Public function '" + public_function_types.begin()->first + "' is not defined.",
-				it->get_line_number(),
-				it->get_char_index()
+				it->getLineNumber(),
+				it->getCharIndex()
 			);
 		}
 		
@@ -596,10 +596,10 @@ namespace cobalt {
 			functions.emplace_back(p.second);
 		}
 		
-		for (incomplete_function& f : incomplete_functions) {
+		for (incompleteFunction& f : incomplete_functions) {
 			functions.emplace_back(f.compile(ctx));
 		}
 		
-		return runtime_context(std::move(initializers), std::move(functions), std::move(public_functions));
+		return runtimeContext(std::move(initializers), std::move(functions), std::move(public_functions));
 	}
 }

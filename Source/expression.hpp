@@ -7,9 +7,9 @@
 #include <string>
 
 namespace cobalt {
-	class runtime_context;
-	class tokens_iterator;
-	class compiler_context;
+	class runtimeContext;
+	class tokensIterator;
+	class compilerContext;
 
 	template <typename R>
 	class expression {
@@ -20,19 +20,19 @@ namespace cobalt {
 	public:
 		using ptr = std::unique_ptr<const expression>;
 		
-		virtual R evaluate(runtime_context& context) const = 0;
+		virtual R evaluate(runtimeContext& context) const = 0;
 		virtual ~expression() = default;
 	};
 	
-	expression<void>::ptr build_void_expression(compiler_context& context, tokens_iterator& it);
-	expression<number>::ptr build_number_expression(compiler_context& context, tokens_iterator& it);
-	expression<lvalue>::ptr build_initialization_expression(
-		compiler_context& context,
-		tokens_iterator& it,
-		type_handle type_id,
+	expression<void>::ptr build_void_expression(compilerContext& context, tokensIterator& it);
+	expression<number>::ptr build_number_expression(compilerContext& context, tokensIterator& it);
+	expression<lvalue>::ptr build_initialisation_expression(
+		compilerContext& context,
+		tokensIterator& it,
+		typeHandle typeID,
 		bool allow_comma
 	);
-	expression<lvalue>::ptr build_default_initialization(type_handle type_id);
+	expression<lvalue>::ptr build_default_initialization(typeHandle typeID);
 }
 
 #endif /* expression_hpp */

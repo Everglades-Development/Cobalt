@@ -2,7 +2,7 @@
 #include "errors.hpp"
 
 namespace cobalt {
-	runtime_context::runtime_context(
+	runtimeContext::runtimeContext(
 		std::vector<expression<lvalue>::ptr> initializers,
 		std::vector<function> functions,
 		std::unordered_map<std::string, size_t> public_functions
@@ -16,7 +16,7 @@ namespace cobalt {
 		initialize();
 	}
 	
-	void runtime_context::initialize() {
+	void runtimeContext::initialize() {
 		_globals.clear();
 		
 		for (const auto& initializer : _initializers) {
@@ -24,36 +24,36 @@ namespace cobalt {
 		}
 	}
 	
-	variable_ptr& runtime_context::global(int idx) {
-		runtime_assertion(idx < _globals.size(), "Uninitialized global variable access");
+	variablePtr& runtimeContext::global(int idx) {
+		runtimeAssertion(idx < _globals.size(), "Uninitialized global variable access");
 		return _globals[idx];
 	}
 
-	variable_ptr& runtime_context::retval() {
+	variablePtr& runtimeContext::retval() {
 		return _stack[_retval_idx];
 	}
 
-	variable_ptr& runtime_context::local(int idx) {
+	variablePtr& runtimeContext::local(int idx) {
 		return _stack[_retval_idx + idx];
 	}
 	
-	const function& runtime_context::get_function(int idx) const {
+	const function& runtimeContext::get_function(int idx) const {
 		return _functions[idx];
 	}
 	
-	const function& runtime_context::get_public_function(const char* name) const{
+	const function& runtimeContext::get_public_function(const char* name) const{
 		return _functions[_public_functions.find(name)->second];
 	}
 	
-	runtime_context::scope runtime_context::enter_scope() {
+	runtimeContext::scope runtimeContext::enterScope() {
 		return scope(*this);
 	}
 	
-	void runtime_context::push(variable_ptr v) {
+	void runtimeContext::push(variablePtr v) {
 		_stack.push_back(std::move(v));
 	}
 
-	variable_ptr runtime_context::call(const function& f, std::vector<variable_ptr> params) {
+	variablePtr runtimeContext::call(const function& f, std::vector<variablePtr> params) {
 		for (size_t i = params.size(); i > 0; --i) {
 			_stack.push_back(std::move(params[i-1]));
 		}
@@ -62,11 +62,11 @@ namespace cobalt {
 		_retval_idx = _stack.size();
 		_stack.resize(_retval_idx + 1);
 		
-		runtime_assertion(bool(f), "Uninitialized function call");
+		runtimeAssertion(bool(f), "Uninitialized function call");
 		
 		f(*this);
 		
-		variable_ptr ret = std::move(_stack[_retval_idx]);
+		variablePtr ret = std::move(_stack[_retval_idx]);
 		
 		_stack.resize(_retval_idx - params.size());
 		
@@ -75,13 +75,13 @@ namespace cobalt {
 		return ret;
 	}
 	
-	runtime_context::scope::scope(runtime_context& context):
+	runtimeContext::scope::scope(runtimeContext& context):
 		_context(context),
 		_stack_size(context._stack.size())
 	{
 	}
 	
-	runtime_context::scope::~scope() {
+	runtimeContext::scope::~scope() {
 		_context._stack.resize(_stack_size);
 	}
 }

@@ -17,7 +17,7 @@ namespace cobalt {
 		template<typename R, typename... Unpacked, typename Left0, typename... Left>
 		struct unpacker<R, std::tuple<Unpacked...>, std::tuple<Left0, Left...> >{
 			R operator()(
-				runtime_context& ctx,
+				runtimeContext& ctx,
 				const std::function<R(Unpacked..., Left0, Left...)>& f,
 				std::tuple<Unpacked...> t
 			) const {
@@ -31,7 +31,7 @@ namespace cobalt {
 							std::tuple<Left0>(
 								*ctx.local(
 									-1 - int(sizeof...(Unpacked))
-								)->static_pointer_downcast<lstring>()->value
+								)->staticPointerDowncast<lstring>()->value
 							)
 						)
 					);
@@ -45,7 +45,7 @@ namespace cobalt {
 							std::tuple<Left0>(
 								ctx.local(
 									-1 - int(sizeof...(Unpacked))
-								)->static_pointer_downcast<lnumber>()->value
+								)->staticPointerDowncast<lnumber>()->value
 							)
 						)
 					);
@@ -56,7 +56,7 @@ namespace cobalt {
 		template<typename R, typename... Unpacked>
 		struct unpacker<R, std::tuple<Unpacked...>, std::tuple<> >{
 			R operator()(
-				runtime_context& ctx,
+				runtimeContext& ctx,
 				const std::function<R(Unpacked...)>& f,
 				std::tuple<Unpacked...> t
 			) const {
@@ -65,17 +65,17 @@ namespace cobalt {
 		};
 		
 		template<typename R, typename... Args>
-		function create_external_function(std::function<R(Args...)> f) {
-			return [f=std::move(f)](runtime_context& ctx) {
+		function createExternalFunction(std::function<R(Args...)> f) {
+			return [f=std::move(f)](runtimeContext& ctx) {
 				if constexpr(std::is_same<R, void>::value) {
 					unpacker<R, std::tuple<>, std::tuple<Args...> >()(ctx, f, std::tuple<>());
 				} else {
 					R retval = unpacker<R, std::tuple<>, std::tuple<Args...> >()(ctx, f, std::tuple<>());
 					if constexpr(std::is_convertible<R, std::string>::value) {
-						ctx.retval() = std::make_shared<variable_impl<string> >(std::make_shared<std::string>(std::move(retval)));
+						ctx.retval() = std::make_shared<variableImpl<string> >(std::make_shared<std::string>(std::move(retval)));
 					} else {
 						static_assert(std::is_convertible<R, number>::value);
-						ctx.retval() = std::make_shared<variable_impl<number> >(retval);
+						ctx.retval() = std::make_shared<variableImpl<number> >(retval);
 					}
 				}
 			};
@@ -96,7 +96,7 @@ namespace cobalt {
 		};
 		
 		template<typename T>
-		struct argument_declaration{
+		struct argumentDeclaration{
 			static constexpr const char* result() {
 				if constexpr(std::is_convertible<const std::string&, T>::value) {
 					return "string";
@@ -107,14 +107,14 @@ namespace cobalt {
 			}
 		};
 		
-		struct function_argument_string{
+		struct functionArgumentString{
 			std::string str;
-			function_argument_string(const char* p):
+			functionArgumentString(const char* p):
 				str(p)
 			{
 			}
 			
-			function_argument_string& operator+=(const function_argument_string& oth) {
+			functionArgumentString& operator+=(const functionArgumentString& oth) {
 				str += ", ";
 				str += oth.str;
 				return *this;
@@ -122,34 +122,34 @@ namespace cobalt {
 		};
 		
 		template<typename R, typename... Args>
-		std::string create_function_declaration(const char* name) {
+		std::string createFunctionDeclaration(const char* name) {
 			if constexpr(sizeof...(Args) == 0) {
 				return std::string("function ") + retval_declaration<R>::result() + " " + name + "()";
 			} else {
 				return std::string("function ") + retval_declaration<R>::result() + " " + name +
 					"(" +
 					(
-						function_argument_string(argument_declaration<Args>::result()) += ...
+						functionArgumentString(argumentDeclaration<Args>::result()) += ...
 					).str +
 					")";
 			}
 		}
 		
-		inline variable_ptr to_variable(number n) {
-			return std::make_shared<variable_impl<number> >(n);
+		inline variablePtr to_variable(number n) {
+			return std::make_shared<variableImpl<number> >(n);
 		}
 		
-		inline variable_ptr to_variable(std::string str) {
-			return std::make_shared<variable_impl<string> >(std::make_shared<std::string>(std::move(str)));
+		inline variablePtr to_variable(std::string str) {
+			return std::make_shared<variableImpl<string> >(std::make_shared<std::string>(std::move(str)));
 		}
 		
 		template <typename T>
-		T move_from_variable(const variable_ptr& v) {
+		T moveFromVariable(const variablePtr& v) {
 			if constexpr (std::is_same<T, std::string>::value) {
-				return std::move(*v->static_pointer_downcast<lstring>()->value);
+				return std::move(*v->staticPointerDowncast<lstring>()->value);
 			} else {
 				static_assert(std::is_same<number, T>::value);
-				return v->static_pointer_downcast<lnumber>()->value;
+				return v->staticPointerDowncast<lnumber>()->value;
 			}
 		}
 	}
@@ -159,34 +159,34 @@ namespace cobalt {
 	class module {
 	private:
 		std::unique_ptr<module_impl> _impl;
-		void add_external_function_impl(std::string declaration, function f);
-		void add_public_function_declaration(std::string declaration, std::string name, std::shared_ptr<function> fptr);
-		runtime_context* get_runtime_context();
+		void addExternalFunctionImpl(std::string declaration, function f);
+		void addPublicFunctionDeclaration(std::string declaration, std::string name, std::shared_ptr<function> fptr);
+		runtimeContext* getRuntimeContext();
 	public:
 		module();
 		
 		template<typename R, typename... Args>
-		void add_external_function(const char* name, std::function<R(Args...)> f) {
-			add_external_function_impl(
-				details::create_function_declaration<R, Args...>(name),
-				details::create_external_function(std::move(f))
+		void addExternalFunctions(const char* name, std::function<R(Args...)> f) {
+			addExternalFunctionImpl(
+				details::createFunctionDeclaration<R, Args...>(name),
+				details::createExternalFunction(std::move(f))
 			);
 		}
 		
 		template<typename R, typename... Args>
-		auto create_public_function_caller(std::string name) {
+		auto createPublicFunctionCaller(std::string name) {
 			std::shared_ptr<function> fptr = std::make_shared<function>();
-			std::string decl = details::create_function_declaration<R, Args...>(name.c_str());
-			add_public_function_declaration(std::move(decl), std::move(name), fptr);
+			std::string decl = details::createFunctionDeclaration<R, Args...>(name.c_str());
+			addPublicFunctionDeclaration(std::move(decl), std::move(name), fptr);
 			
 			return [this, fptr](Args... args){
 				if constexpr(std::is_same<R, void>::value) {
-					get_runtime_context()->call(
+					getRuntimeContext()->call(
 						*fptr,
 						{details::to_variable(std::move(args))...}
 					);
 				} else {
-					return details::move_from_variable<R>(get_runtime_context()->call(
+					return details::moveFromVariable<R>(getRuntimeContext()->call(
 						*fptr,
 						{details::to_variable(args)...}
 					));
@@ -195,9 +195,9 @@ namespace cobalt {
 		}
 		
 		void load(const char* path);
-		bool try_load(const char* path, std::ostream* err = nullptr) noexcept;
+		bool tryLoad(const char* path, std::ostream* err = nullptr) noexcept;
 		
-		void reset_globals();
+		void resetGlobals();
 		
 		~module();
 	};

@@ -4,9 +4,9 @@
 #include "runtimeContext.hpp"
 
 namespace cobalt {
-	flow::flow(flow_type type, int break_level):
+	flow::flow(flow_type type, int breakLevel):
 		_type(type),
-		_break_level(break_level)
+		_break_level(breakLevel)
 	{
 	}
 
@@ -14,28 +14,28 @@ namespace cobalt {
 		return _type;
 	}
 	
-	int flow::break_level() const {
+	int flow::breakLevel() const {
 		return _break_level;
 	}
 	
-	flow flow::normal_flow() {
+	flow flow::normalFlow() {
 		return flow(flow_type::f_normal, 0);
 	}
 
-	flow flow::break_flow(int break_level) {
-		return flow(flow_type::f_break, break_level);
+	flow flow::breakFlow(int breakLevel) {
+		return flow(flow_type::f_break, breakLevel);
 	}
 	
-	flow flow::continue_flow() {
+	flow flow::continueFlow() {
 		return flow(flow_type::f_continue, 0);
 	}
 	
-	flow flow::return_flow() {
+	flow flow::returnFlow() {
 		return flow(flow_type::f_return, 0);
 	}
 	
-	flow flow::consume_break() {
-		return _break_level == 1 ? flow::normal_flow() : flow::break_flow(_break_level-1);
+	flow flow::consumeBreak() {
+		return _break_level == 1 ? flow::normalFlow() : flow::breakFlow(_break_level-1);
 	}
 	
 	namespace {
@@ -48,9 +48,9 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
+			flow execute(runtimeContext& context) override {
 				_expr->evaluate(context);
-				return flow::normal_flow();
+				return flow::normalFlow();
 			}
 		};
 		
@@ -63,14 +63,14 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
-				auto _ = context.enter_scope();
+			flow execute(runtimeContext& context) override {
+				auto _ = context.enterScope();
 				for (const statement_ptr& statement : _statements) {
 					if (flow f = statement->execute(context); f.type() != flow_type::f_normal) {
 						return f;
 					}
 				}
-				return flow::normal_flow();
+				return flow::normalFlow();
 			}
 		};
 			
@@ -83,11 +83,11 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
+			flow execute(runtimeContext& context) override {
 				for (const expression<lvalue>::ptr& decl : _decls) {
 					context.push(decl->evaluate(context));
 				}
-				return flow::normal_flow();
+				return flow::normalFlow();
 			}
 		};
 			
@@ -95,13 +95,13 @@ namespace cobalt {
 		private:
 			int _break_level;
 		public:
-			break_statement(int break_level):
-				_break_level(break_level)
+			break_statement(int breakLevel):
+				_break_level(breakLevel)
 			{
 			}
 			
-			flow execute(runtime_context&) override {
-				return flow::break_flow(_break_level);
+			flow execute(runtimeContext&) override {
+				return flow::breakFlow(_break_level);
 			}
 		};
 		
@@ -109,8 +109,8 @@ namespace cobalt {
 		public:
 			continue_statement() = default;
 			
-			flow execute(runtime_context&) override {
-				return flow::continue_flow();
+			flow execute(runtimeContext&) override {
+				return flow::continueFlow();
 			}
 		};
 		
@@ -123,9 +123,9 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
+			flow execute(runtimeContext& context) override {
 				context.retval() = _expr->evaluate(context);
-				return flow::return_flow();
+				return flow::returnFlow();
 			}
 		};
 		
@@ -133,8 +133,8 @@ namespace cobalt {
 		public:
 			return_void_statement() = default;
 			
-			flow execute(runtime_context&) override {
-				return flow::return_flow();
+			flow execute(runtimeContext&) override {
+				return flow::returnFlow();
 			}
 		};
 		
@@ -149,7 +149,7 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
+			flow execute(runtimeContext& context) override {
 				for (size_t i = 0; i < _exprs.size(); ++i) {
 					if (_exprs[i]->evaluate(context)) {
 						return _statements[i]->execute(context);
@@ -173,8 +173,8 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
-				auto _ = context.enter_scope();
+			flow execute(runtimeContext& context) override {
+				auto _ = context.enterScope();
 				
 				for (const expression<lvalue>::ptr& decl : _decls) {
 					context.push(decl->evaluate(context));
@@ -204,20 +204,20 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
+			flow execute(runtimeContext& context) override {
 				auto it = _cases.find(_expr->evaluate(context));
 				for (size_t idx = (it == _cases.end() ? _dflt : it->second); idx < _statements.size(); ++idx) {
 					switch (flow f = _statements[idx]->execute(context); f.type()) {
 						case flow_type::f_normal:
 							break;
 						case flow_type::f_break:
-							return f.consume_break();
+							return f.consumeBreak();
 						default:
 							return f;
 					}
 				}
 				
-				return flow::normal_flow();
+				return flow::normalFlow();
 			}
 		};
 		
@@ -237,8 +237,8 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
-				auto _ = context.enter_scope();
+			flow execute(runtimeContext& context) override {
+				auto _ = context.enterScope();
 			
 				for (const expression<lvalue>::ptr& decl : _decls) {
 					context.push(decl->evaluate(context));
@@ -259,20 +259,20 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
+			flow execute(runtimeContext& context) override {
 				while (_expr->evaluate(context)) {
 					switch (flow f = _statement->execute(context); f.type()) {
 						case flow_type::f_normal:
 						case flow_type::f_continue:
 							break;
 						case flow_type::f_break:
-							return f.consume_break();
+							return f.consumeBreak();
 						case flow_type::f_return:
 							return f;
 					}
 				}
 				
-				return flow::normal_flow();
+				return flow::normalFlow();
 			}
 		};
 		
@@ -287,20 +287,20 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
+			flow execute(runtimeContext& context) override {
 				do {
 					switch (flow f = _statement->execute(context); f.type()) {
 						case flow_type::f_normal:
 						case flow_type::f_continue:
 							break;
 						case flow_type::f_break:
-							return f.consume_break();
+							return f.consumeBreak();
 						case flow_type::f_return:
 							return f;
 					}
 				} while (_expr->evaluate(context));
 				
-				return flow::normal_flow();
+				return flow::normalFlow();
 			}
 		};
 		
@@ -321,20 +321,20 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
+			flow execute(runtimeContext& context) override {
 				for (; _expr2->evaluate(context); _expr3->evaluate(context)) {
 					switch (flow f = _statement->execute(context); f.type()) {
 						case flow_type::f_normal:
 						case flow_type::f_continue:
 							break;
 						case flow_type::f_break:
-							return f.consume_break();
+							return f.consumeBreak();
 						case flow_type::f_return:
 							return f;
 					}
 				}
 				
-				return flow::normal_flow();
+				return flow::normalFlow();
 			}
 		};
 		
@@ -353,7 +353,7 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
+			flow execute(runtimeContext& context) override {
 				_expr1->evaluate(context);
 				
 				return for_statement_base::execute(context);
@@ -378,8 +378,8 @@ namespace cobalt {
 			{
 			}
 			
-			flow execute(runtime_context& context) override {
-				auto _ = context.enter_scope();
+			flow execute(runtimeContext& context) override {
+				auto _ = context.enterScope();
 				
 				for (const expression<lvalue>::ptr& decl : _decls) {
 					context.push(decl->evaluate(context));
@@ -390,39 +390,39 @@ namespace cobalt {
 		};
 	}
 	
-	statement_ptr create_simple_statement(expression<void>::ptr expr) {
+	statement_ptr createSimpleStatement(expression<void>::ptr expr) {
 		return std::make_unique<simple_statement>(std::move(expr));
 	}
 	
-	statement_ptr create_local_declaration_statement(std::vector<expression<lvalue>::ptr> decls) {
+	statement_ptr createLocalDeclarationState(std::vector<expression<lvalue>::ptr> decls) {
 		return std::make_unique<local_declaration_statement>(std::move(decls));
 	}
 	
-	statement_ptr create_block_statement(std::vector<statement_ptr> statements) {
+	statement_ptr createBlockStatement(std::vector<statement_ptr> statements) {
 		return std::make_unique<block_statement>(std::move(statements));
 	}
 	
-	shared_statement_ptr create_shared_block_statement(std::vector<statement_ptr> statements) {
+	shared_statement_ptr createSharedBlockStatement(std::vector<statement_ptr> statements) {
 		return std::make_shared<block_statement>(std::move(statements));
 	}
 
-	statement_ptr create_break_statement(int break_level) {
-		return std::make_unique<break_statement>(break_level);
+	statement_ptr createBreakStatement(int breakLevel) {
+		return std::make_unique<break_statement>(breakLevel);
 	}
 	
-	statement_ptr create_continue_statement() {
+	statement_ptr createContinueStatement() {
 		return std::make_unique<continue_statement>();
 	}
 	
-	statement_ptr create_return_statement(expression<lvalue>::ptr expr) {
+	statement_ptr createReturnStatement(expression<lvalue>::ptr expr) {
 		return std::make_unique<return_statement>(std::move(expr));
 	}
 	
-	statement_ptr create_return_void_statement() {
+	statement_ptr createReturnVoidStatement() {
 		return std::make_unique<return_void_statement>();
 	}
 	
-	statement_ptr create_if_statement(
+	statement_ptr createIfStatement(
 		std::vector<expression<lvalue>::ptr> decls,
 		std::vector<expression<number>::ptr> exprs,
 		std::vector<statement_ptr> statements
@@ -434,7 +434,7 @@ namespace cobalt {
 		}
 	}
 	
-	statement_ptr create_switch_statement(
+	statement_ptr createSwitchStatement(
 		std::vector<expression<lvalue>::ptr> decls,
 		expression<number>::ptr expr,
 		std::vector<statement_ptr> statements,
@@ -458,15 +458,15 @@ namespace cobalt {
 	}
 	
 	
-	statement_ptr create_while_statement(expression<number>::ptr expr, statement_ptr statement) {
+	statement_ptr createWhileStatement(expression<number>::ptr expr, statement_ptr statement) {
 		return std::make_unique<while_statement>(std::move(expr), std::move(statement));
 	}
 	
-	statement_ptr create_do_statement(expression<number>::ptr expr, statement_ptr statement) {
+	statement_ptr createDoStatement(expression<number>::ptr expr, statement_ptr statement) {
 		return std::make_unique<do_statement>(std::move(expr), std::move(statement));
 	}
 	
-	statement_ptr create_for_statement(
+	statement_ptr createForStatement(
 		expression<void>::ptr expr1,
 		expression<number>::ptr expr2,
 		expression<void>::ptr expr3,
@@ -475,7 +475,7 @@ namespace cobalt {
 		return std::make_unique<for_statement>(std::move(expr1), std::move(expr2), std::move(expr3), std::move(statement));
 	}
 	
-	statement_ptr create_for_statement(
+	statement_ptr createForStatement(
 		std::vector<expression<lvalue>::ptr> decls,
 		expression<number>::ptr expr2,
 		expression<void>::ptr expr3,

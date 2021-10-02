@@ -9,21 +9,21 @@ namespace cobalt {
 	template <typename Key, typename Value>
 	class lookup {
 	public:
-		using value_type = std::pair<Key, Value>;
-		using container_type = std::vector<value_type>;
+		using valueType = std::pair<Key, Value>;
+		using containerType = std::vector<valueType>;
 	private:
-		container_type _container;
+		containerType _container;
 	public:
-		using iterator = typename container_type::const_iterator;
+		using iterator = typename containerType::const_iterator;
 		using const_iterator = iterator;
 		
-		lookup(std::initializer_list<value_type> init) :
+		lookup(std::initializer_list<valueType> init) :
 			_container(init)
 		{
 			std::sort(_container.begin(), _container.end());
 		}
 		
-		lookup(container_type container) :
+		lookup(containerType container) :
 			_container(std::move(container))
 		{
 			std::sort(_container.begin(), _container.end());
@@ -43,7 +43,7 @@ namespace cobalt {
 				begin(),
 				end(),
 				key,
-				[](const value_type& p, const K& key) {
+				[](const valueType& p, const K& key) {
 					return p.first < key;
 				}
 			);

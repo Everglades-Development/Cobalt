@@ -9,120 +9,120 @@
 
 namespace cobalt {
 
-	enum struct identifier_scope {
+	enum struct identifierScope {
 		global_variable,
 		local_variable,
 		function,
 	};
 
-	class identifier_info {
+	class identifierInfo {
 	private:
-		type_handle _type_id;
+		typeHandle _type_id;
 		size_t _index;
-		identifier_scope _scope;
+		identifierScope _scope;
 	public:
-		identifier_info(type_handle type_id, size_t index, identifier_scope scope);
+		identifierInfo(typeHandle typeID, size_t index, identifierScope scope);
 		
-		type_handle type_id() const;
+		typeHandle typeID() const;
 		
 		size_t index() const;
 		
-		identifier_scope get_scope() const;
+		identifierScope getScope() const;
 	};
 	
-	class identifier_lookup {
+	class identifierLookup {
 	private:
-		std::unordered_map<std::string, identifier_info> _identifiers;
+		std::unordered_map<std::string, identifierInfo> _identifiers;
 	protected:
-		const identifier_info* insert_identifier(std::string name, type_handle type_id, size_t index, identifier_scope scope);
-		size_t identifiers_size() const;
+		const identifierInfo* insertIdentifier(std::string name, typeHandle typeID, size_t index, identifierScope scope);
+		size_t identifiersSize() const;
 	public:
-		virtual const identifier_info* find(const std::string& name) const;
+		virtual const identifierInfo* find(const std::string& name) const;
 		
-		virtual const identifier_info* create_identifier(std::string name, type_handle type_id) = 0;
+		virtual const identifierInfo* createIdentifier(std::string name, typeHandle typeID) = 0;
 		
-		bool can_declare(const std::string& name) const;
+		bool canDeclare(const std::string& name) const;
 		
-		virtual ~identifier_lookup();
+		virtual ~identifierLookup();
 	};
 	
-	class global_variable_lookup: public identifier_lookup {
+	class globalVariableLookup: public identifierLookup {
 	public:
-		const identifier_info* create_identifier(std::string name, type_handle type_id) override;
+		const identifierInfo* createIdentifier(std::string name, typeHandle typeID) override;
 	};
 	
-	class local_variable_lookup: public identifier_lookup {
+	class localVariableLookup: public identifierLookup {
 	private:
-		std::unique_ptr<local_variable_lookup> _parent;
+		std::unique_ptr<localVariableLookup> _parent;
 		int _next_identifier_index;
 	public:
-		local_variable_lookup(std::unique_ptr<local_variable_lookup> parent_lookup);
+		localVariableLookup(std::unique_ptr<localVariableLookup> parent_lookup);
 		
-		const identifier_info* find(const std::string& name) const override;
+		const identifierInfo* find(const std::string& name) const override;
 
-		const identifier_info* create_identifier(std::string name, type_handle type_id) override;
+		const identifierInfo* createIdentifier(std::string name, typeHandle typeID) override;
 		
-		std::unique_ptr<local_variable_lookup> detach_parent();
+		std::unique_ptr<localVariableLookup> detach_parent();
 	};
 	
-	class param_lookup: public local_variable_lookup {
+	class paramLookup: public localVariableLookup {
 	private:
 		int _next_param_index;
 	public:
-		param_lookup();
+		paramLookup();
 		
-		const identifier_info* create_param(std::string name, type_handle type_id);
+		const identifierInfo* createParam(std::string name, typeHandle typeID);
 	};
 	
-	class function_lookup: public identifier_lookup {
+	class functionLookup: public identifierLookup {
 	public:
-		const identifier_info* create_identifier(std::string name, type_handle type_id) override;
+		const identifierInfo* createIdentifier(std::string name, typeHandle typeID) override;
 	};
 	
-	class compiler_context {
+	class compilerContext {
 	private:
-		function_lookup _functions;
-		global_variable_lookup _globals;
-		param_lookup* _params;
-		std::unique_ptr<local_variable_lookup> _locals;
-		type_registry _types;
+		functionLookup _functions;
+		globalVariableLookup _globals;
+		paramLookup* _params;
+		std::unique_ptr<localVariableLookup> _locals;
+		typeRegistry _types;
 		
-		class scope_raii {
+		class scopeRaii {
 		private:
-			compiler_context& _context;
+			compilerContext& _context;
 		public:
-			scope_raii(compiler_context& context);
-			~scope_raii();
+			scopeRaii(compilerContext& context);
+			~scopeRaii();
 		};
 		
-		class function_raii {
+		class functionRaii {
 		private:
-			compiler_context& _context;
+			compilerContext& _context;
 		public:
-			function_raii(compiler_context& context);
-			~function_raii();
+			functionRaii(compilerContext& context);
+			~functionRaii();
 		};
 		
-		void enter_function();
-		void enter_scope();
-		void leave_scope();
+		void enterFunction();
+		void enterScope();
+		void leaveScope();
 	public:
-		compiler_context();
+		compilerContext();
 		
-		type_handle get_handle(const type& t);
+		typeHandle getHandle(const type& t);
 		
-		const identifier_info* find(const std::string& name) const;
+		const identifierInfo* find(const std::string& name) const;
 		
-		const identifier_info* create_identifier(std::string name, type_handle type_id);
+		const identifierInfo* createIdentifier(std::string name, typeHandle typeID);
 		
-		const identifier_info* create_param(std::string name, type_handle type_id);
+		const identifierInfo* createParam(std::string name, typeHandle typeID);
 		
-		const identifier_info* create_function(std::string name, type_handle type_id);
+		const identifierInfo* createFunction(std::string name, typeHandle typeID);
 		
-		bool can_declare(const std::string& name) const;
+		bool canDeclare(const std::string& name) const;
 		
-		scope_raii scope();
-		function_raii function();
+		scopeRaii scope();
+		functionRaii function();
 	};
 }
 

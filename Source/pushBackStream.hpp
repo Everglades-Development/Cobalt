@@ -19,8 +19,8 @@ namespace cobalt {
 		
 		void push_back(int c);
 		
-		size_t line_number() const;
-		size_t char_index() const;
+		size_t lineNumber() const;
+		size_t charIndex() const;
 	};
 }
 

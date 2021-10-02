@@ -7,100 +7,100 @@
 
 namespace cobalt {
 	namespace {
-		const lookup<std::string_view, reserved_token> operator_token_map {
-			{"++", reserved_token::inc},
-			{"--", reserved_token::dec},
+		const lookup<std::string_view, reservedToken> operator_token_map {
+			{"++", reservedToken::inc},
+			{"--", reservedToken::dec},
 			
-			{"+", reserved_token::add},
-			{"-", reserved_token::sub},
-			{"..", reserved_token::concat},
-			{"*", reserved_token::mul},
-			{"/", reserved_token::div},
-			{"\\", reserved_token::idiv},
-			{"%", reserved_token::mod},
+			{"+", reservedToken::add},
+			{"-", reservedToken::sub},
+			{"..", reservedToken::concat},
+			{"*", reservedToken::mul},
+			{"/", reservedToken::div},
+			{"\\", reservedToken::idiv},
+			{"%", reservedToken::mod},
 			
-			{"~", reserved_token::bitwise_not},
-			{"&", reserved_token::bitwise_and},
-			{"|", reserved_token::bitwise_or},
-			{"^", reserved_token::bitwise_xor},
-			{"<<", reserved_token::shiftl},
-			{">>", reserved_token::shiftr},
+			{"~", reservedToken::bitwise_not},
+			{"&", reservedToken::bitwise_and},
+			{"|", reservedToken::bitwise_or},
+			{"^", reservedToken::bitwise_xor},
+			{"<<", reservedToken::shiftl},
+			{">>", reservedToken::shiftr},
 			
-			{"=", reserved_token::assign},
+			{"=", reservedToken::assign},
 			
-			{"+=", reserved_token::add_assign},
-			{"-=", reserved_token::sub_assign},
-			{"..=", reserved_token::concat_assign},
-			{"*=", reserved_token::mul_assign},
-			{"/=", reserved_token::div_assign},
-			{"\\=", reserved_token::idiv_assign},
-			{"%=", reserved_token::mod_assign},
+			{"+=", reservedToken::add_assign},
+			{"-=", reservedToken::sub_assign},
+			{"..=", reservedToken::concat_assign},
+			{"*=", reservedToken::mul_assign},
+			{"/=", reservedToken::div_assign},
+			{"\\=", reservedToken::idiv_assign},
+			{"%=", reservedToken::mod_assign},
 			
-			{"&=", reserved_token::and_assign},
-			{"|=", reserved_token::or_assign},
-			{"^=", reserved_token::xor_assign},
-			{"<<=", reserved_token::shiftl_assign},
-			{">>=", reserved_token::shiftr_assign},
+			{"&=", reservedToken::and_assign},
+			{"|=", reservedToken::or_assign},
+			{"^=", reservedToken::xor_assign},
+			{"<<=", reservedToken::shiftl_assign},
+			{">>=", reservedToken::shiftr_assign},
 			
-			{"!", reserved_token::logical_not},
-			{"&&", reserved_token::logical_and},
-			{"||", reserved_token::logical_or},
+			{"!", reservedToken::logical_not},
+			{"&&", reservedToken::logical_and},
+			{"||", reservedToken::logical_or},
 			
-			{"==", reserved_token::eq},
-			{"!=", reserved_token::ne},
-			{"<", reserved_token::lt},
-			{">", reserved_token::gt},
-			{"<=", reserved_token::le},
-			{">=", reserved_token::ge},
+			{"==", reservedToken::eq},
+			{"!=", reservedToken::ne},
+			{"<", reservedToken::lt},
+			{">", reservedToken::gt},
+			{"<=", reservedToken::le},
+			{">=", reservedToken::ge},
 			
-			{"?", reserved_token::question},
-			{":", reserved_token::colon},
+			{"?", reservedToken::question},
+			{":", reservedToken::colon},
 			
-			{",", reserved_token::comma},
+			{",", reservedToken::comma},
 			
-			{";", reserved_token::semicolon},
+			{";", reservedToken::semicolon},
 			
-			{"(", reserved_token::open_round},
-			{")", reserved_token::close_round},
+			{"(", reservedToken::open_round},
+			{")", reservedToken::close_round},
 			
-			{"{", reserved_token::open_curly},
-			{"}", reserved_token::close_curly},
+			{"{", reservedToken::open_curly},
+			{"}", reservedToken::close_curly},
 			
-			{"[", reserved_token::open_square},
-			{"]", reserved_token::close_square},
+			{"[", reservedToken::open_square},
+			{"]", reservedToken::close_square},
 		};
 		
-		const lookup<std::string_view, reserved_token> keyword_token_map {
-			{"sizeof", reserved_token::kw_sizeof},
-			{"tostring", reserved_token::kw_tostring},
+		const lookup<std::string_view, reservedToken> keyword_token_map {
+			{"sizeof", reservedToken::kw_sizeof},
+			{"tostring", reservedToken::kw_tostring},
 		
-			{"if", reserved_token::kw_if},
-			{"else", reserved_token::kw_else},
-			{"elif", reserved_token::kw_elif},
+			{"if", reservedToken::kw_if},
+			{"else", reservedToken::kw_else},
+			{"elif", reservedToken::kw_elif},
 
-			{"switch", reserved_token::kw_switch},
-			{"case", reserved_token::kw_case},
-			{"default", reserved_token::kw_default},
+			{"switch", reservedToken::kw_switch},
+			{"case", reservedToken::kw_case},
+			{"default", reservedToken::kw_default},
 
-			{"for", reserved_token::kw_for},
-			{"while", reserved_token::kw_while},
-			{"do", reserved_token::kw_do},
+			{"for", reservedToken::kw_for},
+			{"while", reservedToken::kw_while},
+			{"do", reservedToken::kw_do},
 
-			{"break", reserved_token::kw_break},
-			{"continue", reserved_token::kw_continue},
-			{"return", reserved_token::kw_return},
+			{"break", reservedToken::kw_break},
+			{"continue", reservedToken::kw_continue},
+			{"return", reservedToken::kw_return},
 
-			{"function", reserved_token::kw_function},
+			{"function", reservedToken::kw_function},
 			
-			{"void", reserved_token::kw_void},
-			{"number", reserved_token::kw_number},
-			{"string", reserved_token::kw_string},
+			{"void", reservedToken::kw_void},
+			{"number", reservedToken::kw_number},
+			{"string", reservedToken::kw_string},
 			
-			{"public", reserved_token::kw_public}
+			{"public", reservedToken::kw_public}
 		};
 		
-		const lookup<reserved_token, std::string_view> token_string_map = ([](){
-			std::vector<std::pair<reserved_token, std::string_view>> container;
+		const lookup<reservedToken, std::string_view> token_string_map = ([](){
+			std::vector<std::pair<reservedToken, std::string_view>> container;
 			container.reserve(operator_token_map.size() + keyword_token_map.size());
 			for (const auto& p : operator_token_map) {
 				container.emplace_back(p.second, p.first);
@@ -108,11 +108,11 @@ namespace cobalt {
 			for (const auto& p : keyword_token_map) {
 				container.emplace_back(p.second, p.first);
 			}
-			return lookup<reserved_token, std::string_view>(std::move(container));
+			return lookup<reservedToken, std::string_view>(std::move(container));
 		})();
 	}
 	
-	std::optional<reserved_token> get_keyword(std::string_view word) {
+	std::optional<reservedToken> getKeyword(std::string_view word) {
 		auto it = keyword_token_map.find(word);
 		return it == keyword_token_map.end() ? std::nullopt : std::make_optional(it->second);
 	}
@@ -131,24 +131,24 @@ namespace cobalt {
 				return l < r;
 			}
 			
-			bool operator()(std::pair<std::string_view, reserved_token> l, char r) const {
+			bool operator()(std::pair<std::string_view, reservedToken> l, char r) const {
 				return l.first.size() <= _idx || l.first[_idx] < r;
 			}
 			
-			bool operator()(char l, std::pair<std::string_view, reserved_token> r) const {
+			bool operator()(char l, std::pair<std::string_view, reservedToken> r) const {
 				return r.first.size() > _idx && l < r.first[_idx];
 			}
 			
-			bool operator()(std::pair<std::string_view, reserved_token> l, std::pair<std::string_view, reserved_token> r) const {
+			bool operator()(std::pair<std::string_view, reservedToken> l, std::pair<std::string_view, reservedToken> r) const {
 				return r.first.size() > _idx && (l.first.size() < _idx || l.first[_idx] < r.first[_idx]);
 			}
 		};
 	}
 	
-	std::optional<reserved_token> get_operator(push_back_stream& stream) {
+	std::optional<reservedToken> getOperator(push_back_stream& stream) {
 		auto candidates = std::make_pair(operator_token_map.begin(), operator_token_map.end());
 		
-		std::optional<reserved_token> ret;
+		std::optional<reservedToken> ret;
 		size_t match_size = 0;
 		
 		std::stack<int> chars;
@@ -172,62 +172,62 @@ namespace cobalt {
 		return ret;
 	}
 	
-	token::token(token_value value, size_t line_number, size_t char_index) :
+	token::token(tokenValue value, size_t lineNumber, size_t charIndex) :
 		_value(std::move(value)),
-		_line_number(line_number),
-		_char_index(char_index)
+		_line_number(lineNumber),
+		_char_index(charIndex)
 	{
 	}
 	
-	bool token::is_reserved_token() const {
-		return std::holds_alternative<reserved_token>(_value);
+	bool token::isReservedToken() const {
+		return std::holds_alternative<reservedToken>(_value);
 	}
 	
-	bool token::is_identifier() const {
+	bool token::isIdentifier() const {
 		return std::holds_alternative<identifier>(_value);
 	}
 	
-	bool token::is_number() const {
+	bool token::isNumber() const {
 		return std::holds_alternative<double>(_value);
 	}
 	
-	bool token::is_string() const {
+	bool token::isString() const {
 		return std::holds_alternative<std::string>(_value);
 	}
 	
-	bool token::is_eof() const {
+	bool token::isEof() const {
 		return std::holds_alternative<eof>(_value);
 	}
 	
-	reserved_token token::get_reserved_token() const {
-		return std::get<reserved_token>(_value);
+	reservedToken token::getReservedToken() const {
+		return std::get<reservedToken>(_value);
 	}
 	
-	const identifier& token::get_identifier() const {
+	const identifier& token::getIdentifier() const {
 		return std::get<identifier>(_value);
 	}
 	
-	double token::get_number() const {
+	double token::getNumber() const {
 		return std::get<double>(_value);
 	}
 	
-	const std::string& token::get_string() const {
+	const std::string& token::getString() const {
 		return std::get<std::string>(_value);
 	}
 	
-	const token_value& token::get_value() const {
+	const tokenValue& token::getValue() const {
 		return _value;
 	}
 	
-	size_t token::get_line_number() const {
+	size_t token::getLineNumber() const {
 		return _line_number;
 	}
 
-	size_t token::get_char_index() const {
+	size_t token::getCharIndex() const {
 		return _char_index;
 	}
 	
-	bool token::has_value(const token_value& value) const {
+	bool token::hasValue(const tokenValue& value) const {
 		return _value == value;
 	}
 	
@@ -250,13 +250,13 @@ namespace cobalt {
 
 namespace std {
 	using namespace cobalt;
-	std::string to_string(reserved_token t) {
+	std::string to_string(reservedToken t) {
 		return std::string(token_string_map.find(t)->second);
 	}
 	
-	std::string to_string(const token_value& t) {
+	std::string to_string(const tokenValue& t) {
 		return std::visit(overloaded{
-			[](reserved_token rt) {
+			[](reservedToken rt) {
 				return to_string(rt);
 			},
 			[](double d) {

@@ -35,11 +35,11 @@ namespace cobalt {
 		--_char_index;
 	}
 	
-	size_t push_back_stream::line_number() const {
+	size_t push_back_stream::lineNumber() const {
 		return _line_number;
 	}
 	
-	size_t push_back_stream::char_index() const {
+	size_t push_back_stream::charIndex() const {
 		return _char_index;
 	}
 }

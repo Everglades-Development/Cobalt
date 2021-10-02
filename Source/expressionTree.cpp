@@ -5,8 +5,8 @@
 
 namespace cobalt {
 	namespace {
-		bool is_convertible(type_handle type_from, bool lvalue_from, type_handle type_to, bool lvalue_to) {
-			if (type_to == type_registry::get_void_handle()) {
+		bool is_convertible(typeHandle type_from, bool lvalue_from, typeHandle type_to, bool lvalue_to) {
+			if (type_to == typeRegistry::getVoidHandle()) {
 				return true;
 			}
 			if (lvalue_to) {
@@ -15,23 +15,23 @@ namespace cobalt {
 			if (type_from == type_to) {
 				return true;
 			}
-			if (const init_list_type* ilt = std::get_if<init_list_type>(type_from)) {
+			if (const initListType* ilt = std::get_if<initListType>(type_from)) {
 				if (lvalue_to) {
 					return false;
 				}
-				if (type_to == type_registry::get_void_handle()) {
+				if (type_to == typeRegistry::getVoidHandle()) {
 					return true;
 				}
 				return std::visit(overloaded{
-					[&](const array_type& at) {
-						for (type_handle it : ilt->inner_type_id) {
+					[&](const arrayType& at) {
+						for (typeHandle it : ilt->inner_type_id) {
 							if (it != at.inner_type_id) {
 								return false;
 							}
 						}
 						return true;
 					},
-					[&](const tuple_type& tt) {
+					[&](const tupleType& tt) {
 						if (tt.inner_type_id.size() != ilt->inner_type_id.size()) {
 							return false;
 						}
@@ -47,19 +47,19 @@ namespace cobalt {
 					}
 				}, *type_to);
 			}
-			return type_from == type_registry::get_number_handle() && type_to == type_registry::get_string_handle();
+			return type_from == typeRegistry::getNumberHandle() && type_to == typeRegistry::getStringHandle();
 		}
 	}
 
-	node::node(compiler_context& context, node_value value, std::vector<node_ptr> children, size_t line_number, size_t char_index) :
+	node::node(compilerContext& context, nodeValue value, std::vector<node_ptr> children, size_t lineNumber, size_t charIndex) :
 		_value(std::move(value)),
 		_children(std::move(children)),
-		_line_number(line_number),
-		_char_index(char_index)
+		_line_number(lineNumber),
+		_char_index(charIndex)
 	{
-		const type_handle void_handle = type_registry::get_void_handle();
-		const type_handle number_handle = type_registry::get_number_handle();
-		const type_handle string_handle = type_registry::get_string_handle();
+		const typeHandle void_handle = typeRegistry::getVoidHandle();
+		const typeHandle number_handle = typeRegistry::getNumberHandle();
+		const typeHandle string_handle = typeRegistry::getStringHandle();
 		
 		std::visit(overloaded {
 			[&](const std::string& value) {
@@ -71,190 +71,190 @@ namespace cobalt {
 				_lvalue = false;
 			},
 			[&](const identifier& value){
-				if (const identifier_info* info = context.find(value.name)) {
-					_type_id = info->type_id();
-					_lvalue = (info->get_scope() != identifier_scope::function);
+				if (const identifierInfo* info = context.find(value.name)) {
+					_type_id = info->typeID();
+					_lvalue = (info->getScope() != identifierScope::function);
 				} else {
-					throw undeclared_error(value.name, _line_number, _char_index);
+					throw undeclaredError(value.name, _line_number, _char_index);
 				}
 			},
-			[&](node_operation value){
+			[&](nodeOperation value){
 				switch (value) {
-					case node_operation::param:
+					case nodeOperation::param:
 						_type_id = _children[0]->_type_id;
 						_lvalue = false;
 						break;
-					case node_operation::preinc:
-					case node_operation::predec:
+					case nodeOperation::preinc:
+					case nodeOperation::predec:
 						_type_id = number_handle;
 						_lvalue = true;
-						_children[0]->check_conversion(number_handle, true);
+						_children[0]->checkConversion(number_handle, true);
 						break;
-					case node_operation::postinc:
-					case node_operation::postdec:
+					case nodeOperation::postinc:
+					case nodeOperation::postdec:
 						_type_id = number_handle;
 						_lvalue = false;
-						_children[0]->check_conversion(number_handle, true);
+						_children[0]->checkConversion(number_handle, true);
 						break;
-					case node_operation::positive:
-					case node_operation::negative:
-					case node_operation::bnot:
-					case node_operation::lnot:
+					case nodeOperation::positive:
+					case nodeOperation::negative:
+					case nodeOperation::bnot:
+					case nodeOperation::lnot:
 						_type_id = number_handle;
 						_lvalue = false;
-						_children[0]->check_conversion(number_handle, false);
+						_children[0]->checkConversion(number_handle, false);
 						break;
-					case node_operation::size:
+					case nodeOperation::size:
 						_type_id = number_handle;
 						_lvalue = false;
 						break;
-					case node_operation::tostring:
+					case nodeOperation::tostring:
 						_type_id = string_handle;
 						_lvalue = false;
 						break;
-					case node_operation::add:
-					case node_operation::sub:
-					case node_operation::mul:
-					case node_operation::div:
-					case node_operation::idiv:
-					case node_operation::mod:
-					case node_operation::band:
-					case node_operation::bor:
-					case node_operation::bxor:
-					case node_operation::bsl:
-					case node_operation::bsr:
-					case node_operation::land:
-					case node_operation::lor:
+					case nodeOperation::add:
+					case nodeOperation::sub:
+					case nodeOperation::mul:
+					case nodeOperation::div:
+					case nodeOperation::idiv:
+					case nodeOperation::mod:
+					case nodeOperation::band:
+					case nodeOperation::bor:
+					case nodeOperation::bxor:
+					case nodeOperation::bsl:
+					case nodeOperation::bsr:
+					case nodeOperation::land:
+					case nodeOperation::lor:
 						_type_id = number_handle;
 						_lvalue = false;
-						_children[0]->check_conversion(number_handle, false);
-						_children[1]->check_conversion(number_handle, false);
+						_children[0]->checkConversion(number_handle, false);
+						_children[1]->checkConversion(number_handle, false);
 						break;
-					case node_operation::eq:
-					case node_operation::ne:
-					case node_operation::lt:
-					case node_operation::gt:
-					case node_operation::le:
-					case node_operation::ge:
+					case nodeOperation::eq:
+					case nodeOperation::ne:
+					case nodeOperation::lt:
+					case nodeOperation::gt:
+					case nodeOperation::le:
+					case nodeOperation::ge:
 						_type_id = number_handle;
 						_lvalue = false;
-						if (!_children[0]->is_number() || !_children[1]->is_number()) {
-							_children[0]->check_conversion(string_handle, false);
-							_children[1]->check_conversion(string_handle, false);
+						if (!_children[0]->isNumber() || !_children[1]->isNumber()) {
+							_children[0]->checkConversion(string_handle, false);
+							_children[1]->checkConversion(string_handle, false);
 						} else {
-							_children[0]->check_conversion(number_handle, false);
-							_children[1]->check_conversion(number_handle, false);
+							_children[0]->checkConversion(number_handle, false);
+							_children[1]->checkConversion(number_handle, false);
 						}
 						break;
-					case node_operation::concat:
-						_type_id = context.get_handle(simple_type::string);
+					case nodeOperation::concat:
+						_type_id = context.getHandle(simpleType::string);
 						_lvalue = false;
-						_children[0]->check_conversion(string_handle, false);
-						_children[1]->check_conversion(string_handle, false);
+						_children[0]->checkConversion(string_handle, false);
+						_children[1]->checkConversion(string_handle, false);
 						break;
-					case node_operation::assign:
-						_type_id = _children[0]->get_type_id();
+					case nodeOperation::assign:
+						_type_id = _children[0]->getTypeID();
 						_lvalue = true;
-						_children[0]->check_conversion(_type_id, true);
-						_children[1]->check_conversion(_type_id, false);
+						_children[0]->checkConversion(_type_id, true);
+						_children[1]->checkConversion(_type_id, false);
 						break;
-					case node_operation::add_assign:
-					case node_operation::sub_assign:
-					case node_operation::mul_assign:
-					case node_operation::div_assign:
-					case node_operation::idiv_assign:
-					case node_operation::mod_assign:
-					case node_operation::band_assign:
-					case node_operation::bor_assign:
-					case node_operation::bxor_assign:
-					case node_operation::bsl_assign:
-					case node_operation::bsr_assign:
+					case nodeOperation::add_assign:
+					case nodeOperation::sub_assign:
+					case nodeOperation::mul_assign:
+					case nodeOperation::div_assign:
+					case nodeOperation::idiv_assign:
+					case nodeOperation::mod_assign:
+					case nodeOperation::band_assign:
+					case nodeOperation::bor_assign:
+					case nodeOperation::bxor_assign:
+					case nodeOperation::bsl_assign:
+					case nodeOperation::bsr_assign:
 						_type_id = number_handle;
 						_lvalue = true;
-						_children[0]->check_conversion(number_handle, true);
-						_children[1]->check_conversion(number_handle, false);
+						_children[0]->checkConversion(number_handle, true);
+						_children[1]->checkConversion(number_handle, false);
 						break;
-					case node_operation::concat_assign:
+					case nodeOperation::concat_assign:
 						_type_id = string_handle;
 						_lvalue = true;
-						_children[0]->check_conversion(string_handle, true);
-						_children[1]->check_conversion(string_handle, false);
+						_children[0]->checkConversion(string_handle, true);
+						_children[1]->checkConversion(string_handle, false);
 						break;
-					case node_operation::comma:
+					case nodeOperation::comma:
 						for (int i = 0; i < int(_children.size()) - 1; ++i) {
-							_children[i]->check_conversion(void_handle, false);
+							_children[i]->checkConversion(void_handle, false);
 						}
-						_type_id = _children.back()->get_type_id();
+						_type_id = _children.back()->getTypeID();
 						_lvalue = _children.back()->is_lvalue();
 						break;
-					case node_operation::index:
+					case nodeOperation::index:
 						_lvalue = _children[0]->is_lvalue();
-						if (const array_type* at = std::get_if<array_type>(_children[0]->get_type_id())) {
+						if (const arrayType* at = std::get_if<arrayType>(_children[0]->getTypeID())) {
 							_type_id = at->inner_type_id;
-						} else if (const tuple_type* tt = std::get_if<tuple_type>(_children[0]->get_type_id())) {
-							if (_children[1]->is_number()) {
-								double idx = _children[1]->get_number();
+						} else if (const tupleType* tt = std::get_if<tupleType>(_children[0]->getTypeID())) {
+							if (_children[1]->isNumber()) {
+								double idx = _children[1]->getNumber();
 								if (size_t(idx) == idx && idx >= 0 && idx < tt->inner_type_id.size()) {
 									_type_id = tt->inner_type_id[size_t(idx)];
 								
                                 } else {
-									throw semantic_error("Invalid tuple index " + std::to_string(idx) , _line_number, _char_index);
+									throw semanticError("Invalid tuple index " + std::to_string(idx) , _line_number, _char_index);
 								}
 							} else {
-								throw semantic_error("Invalid tuple index", _line_number, _char_index);
+								throw semanticError("Invalid tuple index", _line_number, _char_index);
 							}
 						} else {
-							throw semantic_error(to_string(_children[0]->_type_id) + " is not indexable",
+							throw semanticError(to_string(_children[0]->_type_id) + " is not indexable",
 							                     _line_number, _char_index);
 						}
 						break;
-					case node_operation::ternary:
-						_children[0]->check_conversion(number_handle, false);
+					case nodeOperation::ternary:
+						_children[0]->checkConversion(number_handle, false);
 						if (is_convertible(
-							_children[2]->get_type_id(), _children[2]->is_lvalue(),
-							_children[1]->get_type_id(), _children[1]->is_lvalue()
+							_children[2]->getTypeID(), _children[2]->is_lvalue(),
+							_children[1]->getTypeID(), _children[1]->is_lvalue()
 						)) {
-							_children[2]->check_conversion(_children[1]->get_type_id(), _children[1]->is_lvalue());
-							_type_id = _children[1]->get_type_id();
+							_children[2]->checkConversion(_children[1]->getTypeID(), _children[1]->is_lvalue());
+							_type_id = _children[1]->getTypeID();
 							_lvalue = _children[1]->is_lvalue();
 						} else {
-							_children[1]->check_conversion(_children[2]->get_type_id(), _children[2]->is_lvalue());
-							_type_id = _children[2]->get_type_id();
+							_children[1]->checkConversion(_children[2]->getTypeID(), _children[2]->is_lvalue());
+							_type_id = _children[2]->getTypeID();
 							_lvalue = _children[2]->is_lvalue();
 						}
 						break;
-					case node_operation::call:
-						if (const function_type* ft = std::get_if<function_type>(_children[0]->get_type_id())) {
+					case nodeOperation::call:
+						if (const functionType* ft = std::get_if<functionType>(_children[0]->getTypeID())) {
 							_type_id = ft->return_type_id;
 							_lvalue = false;
 							if (ft->param_type_id.size() + 1 != _children.size()) {
-								throw semantic_error("Wrong number of arguments. "
+								throw semanticError("Wrong number of arguments. "
 								                     "Expected " + std::to_string(ft->param_type_id.size()) +
 								                     ", given " + std::to_string(_children.size() - 1),
 								                     _line_number, _char_index);
 							}
 							for (size_t i = 0; i < ft->param_type_id.size(); ++i) {
 								if (_children[i+1]->is_lvalue() && !ft->param_type_id[i].by_ref) {
-									throw semantic_error(
+									throw semanticError(
 										"Function doesn't receive the argument by reference",
-										_children[i+1]->get_line_number(), _children[i+1]->get_char_index()
+										_children[i+1]->getLineNumber(), _children[i+1]->getCharIndex()
 									);
 								}
-								_children[i+1]->check_conversion(ft->param_type_id[i].type_id, ft->param_type_id[i].by_ref);
+								_children[i+1]->checkConversion(ft->param_type_id[i].typeID, ft->param_type_id[i].by_ref);
 							}
 						} else {
-							throw semantic_error(to_string(_children[0]->_type_id) + " is not callable",
+							throw semanticError(to_string(_children[0]->_type_id) + " is not callable",
 							                     _line_number, _char_index);
 						}
 						break;
-					case node_operation::init:
+					case nodeOperation::init:
 					{
-						init_list_type ilt;
+						initListType ilt;
 						ilt.inner_type_id.reserve(_children.size());
 						for (const node_ptr& child : _children) {
-							ilt.inner_type_id.push_back(child->get_type_id());
+							ilt.inner_type_id.push_back(child->getTypeID());
 						}
-						_type_id = context.get_handle(ilt);
+						_type_id = context.getHandle(ilt);
 						_lvalue = false;
 						break;
 					}
@@ -263,47 +263,47 @@ namespace cobalt {
 		},_value);
 	}
 	
-	const node_value& node::get_value() const {
+	const nodeValue& node::getValue() const {
 		return _value;
 	}
 		
 	bool node::is_node_operation() const {
-		return std::holds_alternative<node_operation>(_value);
+		return std::holds_alternative<nodeOperation>(_value);
 	}
 	
-	bool node::is_identifier() const {
+	bool node::isIdentifier() const {
 		return std::holds_alternative<identifier>(_value);
 	}
 	
-	bool node::is_number() const {
+	bool node::isNumber() const {
 		return std::holds_alternative<double>(_value);
 	}
 	
-	bool node::is_string() const {
+	bool node::isString() const {
 		return std::holds_alternative<std::string>(_value);
 	}
 	
-	node_operation node::get_node_operation() const {
-		return std::get<node_operation>(_value);
+	nodeOperation node::getNodeOperation() const {
+		return std::get<nodeOperation>(_value);
 	}
 	
-	std::string_view node::get_identifier() const {
+	std::string_view node::getIdentifier() const {
 		return std::get<identifier>(_value).name;
 	}
 	
-	double node::get_number() const {
+	double node::getNumber() const {
 		return std::get<double>(_value);
 	}
 	
-	std::string_view node::get_string() const {
+	std::string_view node::getString() const {
 		return std::get<std::string>(_value);
 	}
 	
-	const std::vector<node_ptr>& node::get_children() const {
+	const std::vector<node_ptr>& node::getChildren() const {
 		return _children;
 	}
 	
-	type_handle node::get_type_id() const {
+	typeHandle node::getTypeID() const {
 		return _type_id;
 	}
 	
@@ -311,17 +311,17 @@ namespace cobalt {
 		return _lvalue;
 	}
 	
-	size_t node::get_line_number() const {
+	size_t node::getLineNumber() const {
 		return _line_number;
 	}
 	
-	size_t node::get_char_index() const {
+	size_t node::getCharIndex() const {
 		return _char_index;
 	}
 	
-	void node::check_conversion(type_handle type_id, bool lvalue) const{
-		if (!is_convertible(_type_id, _lvalue, type_id, lvalue)) {
-			throw wrong_type_error(std::to_string(_type_id), std::to_string(type_id), lvalue,
+	void node::checkConversion(typeHandle typeID, bool lvalue) const{
+		if (!is_convertible(_type_id, _lvalue, typeID, lvalue)) {
+			throw wrongTypeError(std::to_string(_type_id), std::to_string(typeID), lvalue,
 			                       _line_number, _char_index);
 		}
 	}

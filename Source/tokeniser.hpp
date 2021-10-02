@@ -12,20 +12,20 @@
 namespace cobalt {
 	class push_back_stream;
 
-	class tokens_iterator {
-		tokens_iterator(const tokens_iterator&) = delete;
-		void operator=(const tokens_iterator&) = delete;
+	class tokensIterator {
+		tokensIterator(const tokensIterator&) = delete;
+		void operator=(const tokensIterator&) = delete;
 	private:
 		std::function<token()> _get_next_token;
 		token _current;
 	public:
-		tokens_iterator(push_back_stream& stream);
-		tokens_iterator(std::deque<token>& tokens);
+		tokensIterator(push_back_stream& stream);
+		tokensIterator(std::deque<token>& tokens);
 		
 		const token& operator*() const;
 		const token* operator->() const;
 		
-		tokens_iterator& operator++();
+		tokensIterator& operator++();
 		
 		explicit operator bool() const;
 	};

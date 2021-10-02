@@ -5,11 +5,11 @@ namespace cobalt {
 
 	class module;
 	
-	void add_math_functions(module& m);
-	void add_string_functions(module& m);
-	void add_trace_functions(module& m);
+	void addMathFunctions(module& m);
+	void addStringFunctions(module& m);
+	void addTraceFunctions(module& m);
 	
-	void add_standard_functions(module& m);
+	void addStandardFunctions(module& m);
 }
 
 #endif /* standardFunctions_hpp */

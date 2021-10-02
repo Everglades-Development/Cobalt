@@ -5,35 +5,35 @@
 #include "tokeniser.hpp"
 
 namespace cobalt {
-	function_declaration parse_function_declaration(compiler_context& ctx, tokens_iterator& it) {
-		function_declaration ret;
+	functionDeclaration parseFunctionDeclaration(compilerContext& ctx, tokensIterator& it) {
+		functionDeclaration ret;
 		
-		parse_token_value(ctx, it, reserved_token::kw_function);
+		parseTokenValue(ctx, it, reservedToken::kw_function);
 		
-		function_type ft;
-		ft.return_type_id = parse_type(ctx, it);
-		ret.name = parse_declaration_name(ctx, it);
+		functionType ft;
+		ft.return_type_id = parseType(ctx, it);
+		ret.name = parseDeclarationName(ctx, it);
 		
 		{
 			auto _ = ctx.function();
 			
-			parse_token_value(ctx, it, reserved_token::open_round);
+			parseTokenValue(ctx, it, reservedToken::open_round);
 			
-			while(!it->has_value(reserved_token::close_round)) {
+			while(!it->hasValue(reservedToken::close_round)) {
 				if (!ret.params.empty()) {
-					parse_token_value(ctx, it, reserved_token::comma);
+					parseTokenValue(ctx, it, reservedToken::comma);
 				}
 				
-				type_handle t = parse_type(ctx, it);
+				typeHandle t = parseType(ctx, it);
 				bool byref = false;
-				if (it->has_value(reserved_token::bitwise_and)) {
+				if (it->hasValue(reservedToken::bitwise_and)) {
 					byref = true;
 					++it;
 				}
 				ft.param_type_id.push_back({t, byref});
 				
-				if (!it->has_value(reserved_token::close_round) && !it->has_value(reserved_token::comma)) {
-					ret.params.push_back(parse_declaration_name(ctx, it));
+				if (!it->hasValue(reservedToken::close_round) && !it->hasValue(reservedToken::comma)) {
+					ret.params.push_back(parseDeclarationName(ctx, it));
 				} else {
 					ret.params.push_back("@"+std::to_string(ret.params.size()));
 				}
@@ -41,26 +41,26 @@ namespace cobalt {
 			++it;
 		}
 		
-		ret.type_id = ctx.get_handle(ft);
+		ret.typeID = ctx.getHandle(ft);
 		
 		return ret;
 	}
 
-	incomplete_function::incomplete_function(compiler_context& ctx, tokens_iterator& it) {
-		_decl = parse_function_declaration(ctx, it);
+	incompleteFunction::incompleteFunction(compilerContext& ctx, tokensIterator& it) {
+		_decl = parseFunctionDeclaration(ctx, it);
 		
 		_tokens.push_back(*it);
 		
-		parse_token_value(ctx, it, reserved_token::open_curly);
+		parseTokenValue(ctx, it, reservedToken::open_curly);
 		
 		int nesting = 1;
 		
-		while (nesting && !it->is_eof()) {
-			if (it->has_value(reserved_token::open_curly)) {
+		while (nesting && !it->isEof()) {
+			if (it->hasValue(reservedToken::open_curly)) {
 				++nesting;
 			}
 			
-			if (it->has_value(reserved_token::close_curly)) {
+			if (it->hasValue(reservedToken::close_curly)) {
 				--nesting;
 			}
 			
@@ -69,36 +69,36 @@ namespace cobalt {
 		}
 		
 		if (nesting) {
-			throw unexpected_syntax_error("end of file", it->get_line_number(), it->get_char_index());
+			throw unexpectedSyntaxError("end of file", it->getLineNumber(), it->getCharIndex());
 		}
 		
-		ctx.create_function(_decl.name, _decl.type_id);
+		ctx.createFunction(_decl.name, _decl.typeID);
 	}
 	
-	incomplete_function::incomplete_function(incomplete_function&& orig) noexcept:
+	incompleteFunction::incompleteFunction(incompleteFunction&& orig) noexcept:
 		_tokens(std::move(orig._tokens)),
 		_decl(std::move(orig._decl))
 	{
 	}
 	
-	const function_declaration& incomplete_function::get_decl() const {
+	const functionDeclaration& incompleteFunction::getDecl() const {
 		return _decl;
 	}
 	
-	function incomplete_function::compile(compiler_context& ctx) {
+	function incompleteFunction::compile(compilerContext& ctx) {
 		auto _ = ctx.function();
 		
-		const function_type* ft = std::get_if<function_type>(_decl.type_id);
+		const functionType* ft = std::get_if<functionType>(_decl.typeID);
 		
 		for (int i = 0; i < int(_decl.params.size()); ++i) {
-			ctx.create_param(std::move(_decl.params[i]), ft->param_type_id[i].type_id);
+			ctx.createParam(std::move(_decl.params[i]), ft->param_type_id[i].typeID);
 		}
 		
-		tokens_iterator it(_tokens);
+		tokensIterator it(_tokens);
 		
-		shared_statement_ptr stmt = compile_function_block(ctx, it, ft->return_type_id);
+		shared_statement_ptr stmt = compileFunctionBlock(ctx, it, ft->return_type_id);
 		
-		return [stmt=std::move(stmt)] (runtime_context& ctx) {
+		return [stmt=std::move(stmt)] (runtimeContext& ctx) {
 			stmt->execute(ctx);
 		};
 	}

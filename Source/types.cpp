@@ -2,7 +2,7 @@
 #include "helpers.hpp"
 
 namespace cobalt {
-	bool type_registry::types_less::operator()(const type& t1, const type& t2) const {
+	bool typeRegistry::typesLess::operator()(const type& t1, const type& t2) const {
 		const size_t idx1 = t1.index();
 		const size_t idx2 = t2.index();
 		
@@ -17,8 +17,8 @@ namespace cobalt {
 				return std::get<1>(t1).inner_type_id < std::get<1>(t2).inner_type_id;
 			case 2:
 			{
-				const function_type& ft1 = std::get<2>(t1);
-				const function_type& ft2 = std::get<2>(t2);
+				const functionType& ft1 = std::get<2>(t1);
+				const functionType& ft2 = std::get<2>(t2);
 				
 				if (ft1.return_type_id != ft2.return_type_id) {
 					return ft1.return_type_id < ft2.return_type_id;
@@ -29,8 +29,8 @@ namespace cobalt {
 				}
 				
 				for (size_t i = 0; i < ft1.param_type_id.size(); ++i) {
-					if (ft1.param_type_id[i].type_id != ft2.param_type_id[i].type_id) {
-						return ft1.param_type_id[i].type_id < ft2.param_type_id[i].type_id;
+					if (ft1.param_type_id[i].typeID != ft2.param_type_id[i].typeID) {
+						return ft1.param_type_id[i].typeID < ft2.param_type_id[i].typeID;
 					}
 					if (ft1.param_type_id[i].by_ref != ft2.param_type_id[i].by_ref) {
 						return ft2.param_type_id[i].by_ref;
@@ -40,8 +40,8 @@ namespace cobalt {
 			}
 			case 3:
 			{
-				const tuple_type& tt1 = std::get<3>(t1);
-				const tuple_type& tt2 = std::get<3>(t2);
+				const tupleType& tt1 = std::get<3>(t1);
+				const tupleType& tt2 = std::get<3>(t2);
 				
 				if (tt1.inner_type_id.size() != tt2.inner_type_id.size()) {
 					return tt1.inner_type_id.size() < tt2.inner_type_id.size();
@@ -56,8 +56,8 @@ namespace cobalt {
 			}
 			case 4:
 			{
-				const init_list_type& ilt1 = std::get<4>(t1);
-				const init_list_type& ilt2 = std::get<4>(t2);
+				const initListType& ilt1 = std::get<4>(t1);
+				const initListType& ilt2 = std::get<4>(t2);
 				
 				if (ilt1.inner_type_id.size() != ilt2.inner_type_id.size()) {
 					return ilt1.inner_type_id.size() < ilt2.inner_type_id.size();
@@ -75,19 +75,19 @@ namespace cobalt {
 		return false;
 	}
 
-	type_registry::type_registry(){
+	typeRegistry::typeRegistry(){
 	}
 	
-	type_handle type_registry::get_handle(const type& t) {
+	typeHandle typeRegistry::getHandle(const type& t) {
 		return std::visit(overloaded{
-			[](simple_type t) {
+			[](simpleType t) {
 				switch (t) {
-					case simple_type::nothing:
-						return type_registry::get_void_handle();
-					case simple_type::number:
-						return type_registry::get_number_handle();
-					case simple_type::string:
-						return type_registry::get_string_handle();
+					case simpleType::nothing:
+						return typeRegistry::getVoidHandle();
+					case simpleType::number:
+						return typeRegistry::getNumberHandle();
+					case simpleType::string:
+						return typeRegistry::getStringHandle();
 				}
 			},
 			[this](const auto& t) {
@@ -96,54 +96,54 @@ namespace cobalt {
 		}, t);
 	}
 	
-	type type_registry::void_type = simple_type::nothing;
-	type type_registry::number_type = simple_type::number;
-	type type_registry::string_type = simple_type::string;
+	type typeRegistry::void_type = simpleType::nothing;
+	type typeRegistry::number_type = simpleType::number;
+	type typeRegistry::string_type = simpleType::string;
 }
 
 namespace std {
 	using namespace cobalt;
-	std::string to_string(type_handle t) {
+	std::string to_string(typeHandle t) {
 		return std::visit(overloaded{
-			[](simple_type st) {
+			[](simpleType st) {
 				switch (st) {
-					case simple_type::nothing:
+					case simpleType::nothing:
 						return std::string("void");
-					case simple_type::number:
+					case simpleType::number:
 						return std::string("number");
-					case simple_type::string:
+					case simpleType::string:
 						return std::string("string");
 				}
 			},
-			[](const array_type& at) {
+			[](const arrayType& at) {
 				std::string ret = to_string(at.inner_type_id);
 				ret += "[]";
 				return ret;
 			},
-			[](const function_type& ft) {
+			[](const functionType& ft) {
 				std::string ret = to_string(ft.return_type_id) + "(";
 				const char* separator = "";
-				for (const function_type::param& p: ft.param_type_id) {
-					ret +=  separator + to_string(p.type_id) + (p.by_ref ? "&" : "");
+				for (const functionType::param& p: ft.param_type_id) {
+					ret +=  separator + to_string(p.typeID) + (p.by_ref ? "&" : "");
 					separator = ",";
 				}
 				ret += ")";
 				return ret;
 			},
-			[](const tuple_type& tt) {
+			[](const tupleType& tt) {
 				std::string ret = "[";
 				const char* separator = "";
-				for (type_handle it : tt.inner_type_id) {
+				for (typeHandle it : tt.inner_type_id) {
 					ret +=  separator + to_string(it);
 					separator = ",";
 				}
 				ret += "]";
 				return ret;
 			},
-			[](const init_list_type& ilt) {
+			[](const initListType& ilt) {
 				std::string ret = "{";
 				const char* separator = "";
-				for (type_handle it : ilt.inner_type_id) {
+				for (typeHandle it : ilt.inner_type_id) {
 					ret +=  separator + to_string(it);
 					separator = ",";
 				}

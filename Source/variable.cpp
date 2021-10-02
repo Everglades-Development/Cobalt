@@ -8,47 +8,47 @@ namespace cobalt {
 	}
 	
 	template<typename T>
-	variable_impl<T>::variable_impl(T value):
+	variableImpl<T>::variableImpl(T value):
 		value(std::move(value))
 	{
 	}
 	
 	template<typename T>
-	variable_ptr variable_impl<T>::clone() const {
-		return std::make_shared<variable_impl<T> >(clone_variable_value(value));
+	variablePtr variableImpl<T>::clone() const {
+		return std::make_shared<variableImpl<T> >(cloneVariableValue(value));
 	}
 	
 	template<typename T>
-	string variable_impl<T>::to_string() const {
-		return convert_to_string(value);
+	string variableImpl<T>::to_string() const {
+		return convertToString(value);
 	}
 	
-	template class variable_impl<number>;
-	template class variable_impl<string>;
-	template class variable_impl<function>;
-	template class variable_impl<array>;
+	template class variableImpl<number>;
+	template class variableImpl<string>;
+	template class variableImpl<function>;
+	template class variableImpl<array>;
 	
-	number clone_variable_value(number value) {
+	number cloneVariableValue(number value) {
 		return value;
 	}
 	
-	string clone_variable_value(const string& value) {
+	string cloneVariableValue(const string& value) {
 		return value;
 	}
 	
-	function clone_variable_value(const function& value) {
+	function cloneVariableValue(const function& value) {
 		return value;
 	}
 
-	array clone_variable_value(const array& value) {
+	array cloneVariableValue(const array& value) {
 		array ret;
-		for (const variable_ptr& v : value) {
+		for (const variablePtr& v : value) {
 			ret.push_back(v->clone());
 		}
 		return ret;
 	}
 	
-	string convert_to_string(number value) {
+	string convertToString(number value) {
 		if (value == int(value)) {
 			return from_std_string(std::to_string(int(value)));
 		} else {
@@ -56,18 +56,18 @@ namespace cobalt {
 		}
 	}
 	
-	string convert_to_string(const string& value) {
+	string convertToString(const string& value) {
 		return value;
 	}
 	
-	string convert_to_string(const function& value) {
+	string convertToString(const function& value) {
 		return from_std_string("FUNCTION");
 	}
 	
-	string convert_to_string(const array& value) {
+	string convertToString(const array& value) {
 		std::string ret = "[";
 		const char* separator = "";
-		for (const variable_ptr& v : value) {
+		for (const variablePtr& v : value) {
 			ret += separator;
 			ret += *(v->to_string());
 			separator = ", ";
@@ -76,7 +76,7 @@ namespace cobalt {
 		return from_std_string(std::move(ret));
 	}
 	
-	string convert_to_string(const lvalue& var) {
+	string convertToString(const lvalue& var) {
 		return var->to_string();
 	}
 }

@@ -30,96 +30,96 @@ namespace cobalt {
 		};
 		
 		struct operator_info {
-			node_operation operation;
+			nodeOperation operation;
 			operator_precedence precedence;
 			operator_associativity associativity;
 			int number_of_operands;
-			size_t line_number;
-			size_t char_index;
+			size_t lineNumber;
+			size_t charIndex;
 			
-			operator_info(node_operation operation, size_t line_number, size_t char_index) :
+			operator_info(nodeOperation operation, size_t lineNumber, size_t charIndex) :
 				operation(operation),
-				line_number(line_number),
-				char_index(char_index)
+				lineNumber(lineNumber),
+				charIndex(charIndex)
 			{
 				switch (operation) {
-					case node_operation::init:
+					case nodeOperation::init:
 						precedence = operator_precedence::brackets;
 						break;
-					case node_operation::param: // This will never happen. Used only for the node creation.
-					case node_operation::postinc:
-					case node_operation::postdec:
-					case node_operation::index:
-					case node_operation::call:
+					case nodeOperation::param: // This will never happen. Used only for the node creation.
+					case nodeOperation::postinc:
+					case nodeOperation::postdec:
+					case nodeOperation::index:
+					case nodeOperation::call:
 						precedence = operator_precedence::postfix;
 						break;
-					case node_operation::preinc:
-					case node_operation::predec:
-					case node_operation::positive:
-					case node_operation::negative:
-					case node_operation::bnot:
-					case node_operation::lnot:
-					case node_operation::size:
-					case node_operation::tostring:
+					case nodeOperation::preinc:
+					case nodeOperation::predec:
+					case nodeOperation::positive:
+					case nodeOperation::negative:
+					case nodeOperation::bnot:
+					case nodeOperation::lnot:
+					case nodeOperation::size:
+					case nodeOperation::tostring:
 						precedence = operator_precedence::prefix;
 						break;
-					case node_operation::mul:
-					case node_operation::div:
-					case node_operation::idiv:
-					case node_operation::mod:
+					case nodeOperation::mul:
+					case nodeOperation::div:
+					case nodeOperation::idiv:
+					case nodeOperation::mod:
 						precedence = operator_precedence::multiplication;
 						break;
-					case node_operation::add:
-					case node_operation::sub:
-					case node_operation::concat:
+					case nodeOperation::add:
+					case nodeOperation::sub:
+					case nodeOperation::concat:
 						precedence = operator_precedence::addition;
 						break;
-					case node_operation::bsl:
-					case node_operation::bsr:
+					case nodeOperation::bsl:
+					case nodeOperation::bsr:
 						precedence = operator_precedence::shift;
 						break;
-					case node_operation::lt:
-					case node_operation::gt:
-					case node_operation::le:
-					case node_operation::ge:
+					case nodeOperation::lt:
+					case nodeOperation::gt:
+					case nodeOperation::le:
+					case nodeOperation::ge:
 						precedence = operator_precedence::comparison;
 						break;
-					case node_operation::eq:
-					case node_operation::ne:
+					case nodeOperation::eq:
+					case nodeOperation::ne:
 						precedence = operator_precedence::equality;
 						break;
-					case node_operation::band:
+					case nodeOperation::band:
 						precedence = operator_precedence::bitwise_and;
 						break;
-					case node_operation::bxor:
+					case nodeOperation::bxor:
 						precedence = operator_precedence::bitwise_xor;
 						break;
-					case node_operation::bor:
+					case nodeOperation::bor:
 						precedence = operator_precedence::bitwise_or;
 						break;
-					case node_operation::land:
+					case nodeOperation::land:
 						precedence = operator_precedence::logical_and;
 						break;
-					case node_operation::lor:
+					case nodeOperation::lor:
 						precedence = operator_precedence::logical_or;
 						break;
-					case node_operation::assign:
-					case node_operation::add_assign:
-					case node_operation::sub_assign:
-					case node_operation::mul_assign:
-					case node_operation::div_assign:
-					case node_operation::idiv_assign:
-					case node_operation::mod_assign:
-					case node_operation::band_assign:
-					case node_operation::bor_assign:
-					case node_operation::bxor_assign:
-					case node_operation::bsl_assign:
-					case node_operation::bsr_assign:
-					case node_operation::concat_assign:
-					case node_operation::ternary:
+					case nodeOperation::assign:
+					case nodeOperation::add_assign:
+					case nodeOperation::sub_assign:
+					case nodeOperation::mul_assign:
+					case nodeOperation::div_assign:
+					case nodeOperation::idiv_assign:
+					case nodeOperation::mod_assign:
+					case nodeOperation::band_assign:
+					case nodeOperation::bor_assign:
+					case nodeOperation::bxor_assign:
+					case nodeOperation::bsl_assign:
+					case nodeOperation::bsr_assign:
+					case nodeOperation::concat_assign:
+					case nodeOperation::ternary:
 						precedence = operator_precedence::assignment;
 						break;
-					case node_operation::comma:
+					case nodeOperation::comma:
 						precedence = operator_precedence::comma;
 						break;
 				}
@@ -135,23 +135,23 @@ namespace cobalt {
 				}
 				
 				switch (operation) {
-					case node_operation::init:
+					case nodeOperation::init:
 						number_of_operands = 0; //zero or more
 						break;
-					case node_operation::postinc:
-					case node_operation::postdec:
-					case node_operation::preinc:
-					case node_operation::predec:
-					case node_operation::positive:
-					case node_operation::negative:
-					case node_operation::bnot:
-					case node_operation::lnot:
-					case node_operation::size:
-					case node_operation::tostring:
-					case node_operation::call: //at least one
+					case nodeOperation::postinc:
+					case nodeOperation::postdec:
+					case nodeOperation::preinc:
+					case nodeOperation::predec:
+					case nodeOperation::positive:
+					case nodeOperation::negative:
+					case nodeOperation::bnot:
+					case nodeOperation::lnot:
+					case nodeOperation::size:
+					case nodeOperation::tostring:
+					case nodeOperation::call: //at least one
 						number_of_operands = 1;
 						break;
-					case node_operation::ternary:
+					case nodeOperation::ternary:
 						number_of_operands = 3;
 						break;
 					default:
@@ -161,119 +161,119 @@ namespace cobalt {
 			}
 		};
 
-		operator_info get_operator_info(reserved_token token, bool prefix, size_t line_number, size_t char_index) {
+		operator_info get_operator_info(reservedToken token, bool prefix, size_t lineNumber, size_t charIndex) {
 			switch(token) {
-				case reserved_token::inc:
-					return prefix ? operator_info(node_operation::preinc, line_number, char_index)
-					              : operator_info(node_operation::postinc, line_number, char_index);
-				case reserved_token::dec:
-					return prefix ? operator_info(node_operation::predec, line_number, char_index)
-					              : operator_info(node_operation::postdec, line_number, char_index);
-				case reserved_token::add:
-					return prefix ? operator_info(node_operation::positive, line_number, char_index)
-								  : operator_info(node_operation::add, line_number, char_index);
-				case reserved_token::sub:
-					return prefix ? operator_info(node_operation::negative, line_number, char_index)
-					              : operator_info(node_operation::sub, line_number, char_index);
-				case reserved_token::concat:
-					return operator_info(node_operation::concat, line_number, char_index);
-				case reserved_token::mul:
-					return operator_info(node_operation::mul, line_number, char_index);
-				case reserved_token::div:
-					return operator_info(node_operation::div, line_number, char_index);
-				case reserved_token::idiv:
-					return operator_info(node_operation::idiv, line_number, char_index);
-				case reserved_token::mod:
-					return operator_info(node_operation::mod, line_number, char_index);
-				case reserved_token::bitwise_not:
-					return operator_info(node_operation::bnot, line_number, char_index);
-				case reserved_token::bitwise_and:
-					return operator_info(node_operation::band, line_number, char_index);
-				case reserved_token::bitwise_or:
-					return operator_info(node_operation::bor, line_number, char_index);
-				case reserved_token::bitwise_xor:
-					return operator_info(node_operation::bxor, line_number, char_index);
-				case reserved_token::shiftl:
-					return operator_info(node_operation::bsl, line_number, char_index);
-				case reserved_token::shiftr:
-					return operator_info(node_operation::bsr, line_number, char_index);
-				case reserved_token::assign:
-					return operator_info(node_operation::assign, line_number, char_index);
-				case reserved_token::add_assign:
-					return operator_info(node_operation::add_assign, line_number, char_index);
-				case reserved_token::sub_assign:
-					return operator_info(node_operation::sub_assign, line_number, char_index);
-				case reserved_token::concat_assign:
-					return operator_info(node_operation::concat_assign, line_number, char_index);
-				case reserved_token::mul_assign:
-					return operator_info(node_operation::mod_assign, line_number, char_index);
-				case reserved_token::div_assign:
-					return operator_info(node_operation::div_assign, line_number, char_index);
-				case reserved_token::idiv_assign:
-					return operator_info(node_operation::idiv_assign, line_number, char_index);
-				case reserved_token::mod_assign:
-					return operator_info(node_operation::mod_assign, line_number, char_index);
-				case reserved_token::and_assign:
-					return operator_info(node_operation::band_assign, line_number, char_index);
-				case reserved_token::or_assign:
-					return operator_info(node_operation::bor_assign, line_number, char_index);
-				case reserved_token::xor_assign:
-					return operator_info(node_operation::bxor_assign, line_number, char_index);
-				case reserved_token::shiftl_assign:
-					return operator_info(node_operation::bsl_assign, line_number, char_index);
-				case reserved_token::shiftr_assign:
-					return operator_info(node_operation::bsr_assign, line_number, char_index);
-				case reserved_token::logical_not:
-					return operator_info(node_operation::lnot, line_number, char_index);
-				case reserved_token::logical_and:
-					return operator_info(node_operation::land, line_number, char_index);
-				case reserved_token::logical_or:
-					return operator_info(node_operation::lor, line_number, char_index);
-				case reserved_token::eq:
-					return operator_info(node_operation::eq, line_number, char_index);
-				case reserved_token::ne:
-					return operator_info(node_operation::ne, line_number, char_index);
-				case reserved_token::lt:
-					return operator_info(node_operation::lt, line_number, char_index);
-				case reserved_token::gt:
-					return operator_info(node_operation::gt, line_number, char_index);
-				case reserved_token::le:
-					return operator_info(node_operation::le, line_number, char_index);
-				case reserved_token::ge:
-					return operator_info(node_operation::ge, line_number, char_index);
-				case reserved_token::question:
-					return operator_info(node_operation::ternary, line_number, char_index);
-				case reserved_token::comma:
-					return operator_info(node_operation::comma, line_number, char_index);
-				case reserved_token::open_round:
-					return operator_info(node_operation::call, line_number, char_index);
-				case reserved_token::open_square:
-					return operator_info(node_operation::index, line_number, char_index);
-				case reserved_token::kw_sizeof:
-					return operator_info(node_operation::size, line_number, char_index);
-				case reserved_token::kw_tostring:
-					return operator_info(node_operation::tostring, line_number, char_index);
-				case reserved_token::open_curly:
-					return operator_info(node_operation::init, line_number, char_index);
+				case reservedToken::inc:
+					return prefix ? operator_info(nodeOperation::preinc, lineNumber, charIndex)
+					              : operator_info(nodeOperation::postinc, lineNumber, charIndex);
+				case reservedToken::dec:
+					return prefix ? operator_info(nodeOperation::predec, lineNumber, charIndex)
+					              : operator_info(nodeOperation::postdec, lineNumber, charIndex);
+				case reservedToken::add:
+					return prefix ? operator_info(nodeOperation::positive, lineNumber, charIndex)
+								  : operator_info(nodeOperation::add, lineNumber, charIndex);
+				case reservedToken::sub:
+					return prefix ? operator_info(nodeOperation::negative, lineNumber, charIndex)
+					              : operator_info(nodeOperation::sub, lineNumber, charIndex);
+				case reservedToken::concat:
+					return operator_info(nodeOperation::concat, lineNumber, charIndex);
+				case reservedToken::mul:
+					return operator_info(nodeOperation::mul, lineNumber, charIndex);
+				case reservedToken::div:
+					return operator_info(nodeOperation::div, lineNumber, charIndex);
+				case reservedToken::idiv:
+					return operator_info(nodeOperation::idiv, lineNumber, charIndex);
+				case reservedToken::mod:
+					return operator_info(nodeOperation::mod, lineNumber, charIndex);
+				case reservedToken::bitwise_not:
+					return operator_info(nodeOperation::bnot, lineNumber, charIndex);
+				case reservedToken::bitwise_and:
+					return operator_info(nodeOperation::band, lineNumber, charIndex);
+				case reservedToken::bitwise_or:
+					return operator_info(nodeOperation::bor, lineNumber, charIndex);
+				case reservedToken::bitwise_xor:
+					return operator_info(nodeOperation::bxor, lineNumber, charIndex);
+				case reservedToken::shiftl:
+					return operator_info(nodeOperation::bsl, lineNumber, charIndex);
+				case reservedToken::shiftr:
+					return operator_info(nodeOperation::bsr, lineNumber, charIndex);
+				case reservedToken::assign:
+					return operator_info(nodeOperation::assign, lineNumber, charIndex);
+				case reservedToken::add_assign:
+					return operator_info(nodeOperation::add_assign, lineNumber, charIndex);
+				case reservedToken::sub_assign:
+					return operator_info(nodeOperation::sub_assign, lineNumber, charIndex);
+				case reservedToken::concat_assign:
+					return operator_info(nodeOperation::concat_assign, lineNumber, charIndex);
+				case reservedToken::mul_assign:
+					return operator_info(nodeOperation::mod_assign, lineNumber, charIndex);
+				case reservedToken::div_assign:
+					return operator_info(nodeOperation::div_assign, lineNumber, charIndex);
+				case reservedToken::idiv_assign:
+					return operator_info(nodeOperation::idiv_assign, lineNumber, charIndex);
+				case reservedToken::mod_assign:
+					return operator_info(nodeOperation::mod_assign, lineNumber, charIndex);
+				case reservedToken::and_assign:
+					return operator_info(nodeOperation::band_assign, lineNumber, charIndex);
+				case reservedToken::or_assign:
+					return operator_info(nodeOperation::bor_assign, lineNumber, charIndex);
+				case reservedToken::xor_assign:
+					return operator_info(nodeOperation::bxor_assign, lineNumber, charIndex);
+				case reservedToken::shiftl_assign:
+					return operator_info(nodeOperation::bsl_assign, lineNumber, charIndex);
+				case reservedToken::shiftr_assign:
+					return operator_info(nodeOperation::bsr_assign, lineNumber, charIndex);
+				case reservedToken::logical_not:
+					return operator_info(nodeOperation::lnot, lineNumber, charIndex);
+				case reservedToken::logical_and:
+					return operator_info(nodeOperation::land, lineNumber, charIndex);
+				case reservedToken::logical_or:
+					return operator_info(nodeOperation::lor, lineNumber, charIndex);
+				case reservedToken::eq:
+					return operator_info(nodeOperation::eq, lineNumber, charIndex);
+				case reservedToken::ne:
+					return operator_info(nodeOperation::ne, lineNumber, charIndex);
+				case reservedToken::lt:
+					return operator_info(nodeOperation::lt, lineNumber, charIndex);
+				case reservedToken::gt:
+					return operator_info(nodeOperation::gt, lineNumber, charIndex);
+				case reservedToken::le:
+					return operator_info(nodeOperation::le, lineNumber, charIndex);
+				case reservedToken::ge:
+					return operator_info(nodeOperation::ge, lineNumber, charIndex);
+				case reservedToken::question:
+					return operator_info(nodeOperation::ternary, lineNumber, charIndex);
+				case reservedToken::comma:
+					return operator_info(nodeOperation::comma, lineNumber, charIndex);
+				case reservedToken::open_round:
+					return operator_info(nodeOperation::call, lineNumber, charIndex);
+				case reservedToken::open_square:
+					return operator_info(nodeOperation::index, lineNumber, charIndex);
+				case reservedToken::kw_sizeof:
+					return operator_info(nodeOperation::size, lineNumber, charIndex);
+				case reservedToken::kw_tostring:
+					return operator_info(nodeOperation::tostring, lineNumber, charIndex);
+				case reservedToken::open_curly:
+					return operator_info(nodeOperation::init, lineNumber, charIndex);
 				default:
-					throw unexpected_syntax_error(std::to_string(token), line_number, char_index);
+					throw unexpectedSyntaxError(std::to_string(token), lineNumber, charIndex);
 			}
 		}
 
 		bool is_end_of_expression(const token& t, bool allow_comma) {
-			if (t.is_eof()) {
+			if (t.isEof()) {
 				return true;
 			}
 
-			if (t.is_reserved_token()) {
-				switch (t.get_reserved_token()) {
-					case reserved_token::semicolon:
-					case reserved_token::close_round:
-					case reserved_token::close_square:
-					case reserved_token::close_curly:
-					case reserved_token::colon:
+			if (t.isReservedToken()) {
+				switch (t.getReservedToken()) {
+					case reservedToken::semicolon:
+					case reservedToken::close_round:
+					case reservedToken::close_square:
+					case reservedToken::close_curly:
+					case reservedToken::colon:
 						return true;
-					case reserved_token::comma:
+					case reservedToken::comma:
 						return !allow_comma;
 					default:
 						return false;
@@ -289,18 +289,18 @@ namespace cobalt {
 		
 		void pop_one_operator(
 			std::stack<operator_info>& operator_stack, std::stack<node_ptr>& operand_stack,
-			compiler_context& context, size_t line_number, size_t char_index
+			compilerContext& context, size_t lineNumber, size_t charIndex
 		) {
 			if (operand_stack.size() < operator_stack.top().number_of_operands) {
-				throw compiler_error("Failed to parse an expression", line_number, char_index);
+				throw compilerError("Failed to parse an expression", lineNumber, charIndex);
 			}
 			
 			std::vector<node_ptr> operands;
 			operands.resize(operator_stack.top().number_of_operands);
 			
 			if (operator_stack.top().precedence != operator_precedence::prefix) {
-				operator_stack.top().line_number = operand_stack.top()->get_line_number();
-				operator_stack.top().char_index = operand_stack.top()->get_char_index();
+				operator_stack.top().lineNumber = operand_stack.top()->getLineNumber();
+				operator_stack.top().charIndex = operand_stack.top()->getCharIndex();
 			}
 			
 			for (int i = operator_stack.top().number_of_operands - 1; i >= 0; --i) {
@@ -309,57 +309,57 @@ namespace cobalt {
 			}
 			
 			operand_stack.push(std::make_unique<node>(
-				context, operator_stack.top().operation, std::move(operands), operator_stack.top().line_number, operator_stack.top().char_index)
+				context, operator_stack.top().operation, std::move(operands), operator_stack.top().lineNumber, operator_stack.top().charIndex)
 			);
 			
 			operator_stack.pop();
 		}
 		
-		node_ptr parse_expression_tree_impl(compiler_context& context, tokens_iterator& it, bool allow_comma, bool allow_empty) {
+		node_ptr parse_expression_tree_impl(compilerContext& context, tokensIterator& it, bool allow_comma, bool allow_empty) {
 			std::stack<node_ptr> operand_stack;
 			std::stack<operator_info> operator_stack;
 			
 			bool expected_operand = true;
 			
 			for (; !is_end_of_expression(*it, allow_comma); ++it) {
-				if (it->is_reserved_token()) {
+				if (it->isReservedToken()) {
 					operator_info oi = get_operator_info(
-						it->get_reserved_token(), expected_operand, it->get_line_number(), it->get_char_index()
+						it->getReservedToken(), expected_operand, it->getLineNumber(), it->getCharIndex()
 					);
 					
-					if (oi.operation == node_operation::call && expected_operand) {
+					if (oi.operation == nodeOperation::call && expected_operand) {
 						//open round bracket is misinterpreted as a function call
 						++it;
 						operand_stack.push(parse_expression_tree_impl(context, it, true, false));
-						if (it->has_value(reserved_token::close_round)) {
+						if (it->hasValue(reservedToken::close_round)) {
 							expected_operand = false;
 							continue;
 						} else {
-							throw syntax_error("Expected closing ')'", it->get_line_number(), it->get_char_index());
+							throw syntaxError("Expected closing ')'", it->getLineNumber(), it->getCharIndex());
 						}
 					}
 					
-					if (oi.operation == node_operation::init && expected_operand) {
+					if (oi.operation == nodeOperation::init && expected_operand) {
 						++it;
 						std::vector<node_ptr> children;
-						if (!it->has_value(reserved_token::close_curly)) {
+						if (!it->hasValue(reservedToken::close_curly)) {
 							while (true) {
 								children.push_back(parse_expression_tree_impl(context, it, false, false));
-								if (it->has_value(reserved_token::close_curly)) {
+								if (it->hasValue(reservedToken::close_curly)) {
 									break;
-								} else if (it->has_value(reserved_token::comma)) {
+								} else if (it->hasValue(reservedToken::comma)) {
 									++it;
 								} else {
-									throw syntax_error("Expected ',', or closing '}'", it->get_line_number(), it->get_char_index());
+									throw syntaxError("Expected ',', or closing '}'", it->getLineNumber(), it->getCharIndex());
 								}
 							}
 						}
 						operand_stack.push(std::make_unique<node>(
 							context,
-							node_operation::init,
+							nodeOperation::init,
 							std::move(children),
-							it->get_line_number(),
-							it->get_char_index()
+							it->getLineNumber(),
+							it->getCharIndex()
 						));
 						
 						expected_operand = false;
@@ -367,46 +367,46 @@ namespace cobalt {
 					}
 					
 					if ((oi.precedence == operator_precedence::prefix) != expected_operand) {
-						throw unexpected_syntax_error(
-							std::to_string(it->get_value()),
-							it->get_line_number(),
-							it->get_char_index()
+						throw unexpectedSyntaxError(
+							std::to_string(it->getValue()),
+							it->getLineNumber(),
+							it->getCharIndex()
 						);
 					}
 					
 					if (!operator_stack.empty() && is_evaluated_before(operator_stack.top(), oi)) {
-						pop_one_operator(operator_stack, operand_stack, context, it->get_line_number(), it->get_char_index());
+						pop_one_operator(operator_stack, operand_stack, context, it->getLineNumber(), it->getCharIndex());
 					}
 					
 					switch (oi.operation) {
-						case node_operation::call:
+						case nodeOperation::call:
 							++it;
-							if (!it->has_value(reserved_token::close_round)) {
+							if (!it->hasValue(reservedToken::close_round)) {
 								while (true) {
-									bool remove_lvalue = !it->has_value(reserved_token::bitwise_and);
+									bool remove_lvalue = !it->hasValue(reservedToken::bitwise_and);
 									if (!remove_lvalue) {
 										++it;
 									}
 									node_ptr argument = parse_expression_tree_impl(context, it, false, false);
 									if (remove_lvalue) {
-										size_t line_number = argument->get_line_number();
-										size_t char_index = argument->get_char_index();
+										size_t lineNumber = argument->getLineNumber();
+										size_t charIndex = argument->getCharIndex();
 										std::vector<node_ptr> argument_vector;
 										argument_vector.push_back(std::move(argument));
 										argument = std::make_unique<node>(
 											context,
-											node_operation::param,
+											nodeOperation::param,
 											std::move(argument_vector),
-											line_number,
-											char_index
+											lineNumber,
+											charIndex
 										);
 									} else if (!argument->is_lvalue()) {
-										throw wrong_type_error(
-											std::to_string(argument->get_type_id()),
-											std::to_string(argument->get_type_id()),
+										throw wrongTypeError(
+											std::to_string(argument->getTypeID()),
+											std::to_string(argument->getTypeID()),
 											true,
-											argument->get_line_number(),
-											argument->get_char_index()
+											argument->getLineNumber(),
+											argument->getCharIndex()
 										);
 									}
 									
@@ -414,28 +414,28 @@ namespace cobalt {
 
 									++oi.number_of_operands;
 									
-									if (it->has_value(reserved_token::close_round)) {
+									if (it->hasValue(reservedToken::close_round)) {
 										break;
-									} else if (it->has_value(reserved_token::comma)) {
+									} else if (it->hasValue(reservedToken::comma)) {
 										++it;
 									} else {
-										throw syntax_error("Expected ',', or closing ')'", it->get_line_number(), it->get_char_index());
+										throw syntaxError("Expected ',', or closing ')'", it->getLineNumber(), it->getCharIndex());
 									}
 								}
 							}
 							break;
-						case node_operation::index:
+						case nodeOperation::index:
 							++it;
 							operand_stack.push(parse_expression_tree_impl(context, it, true, false));
-							if (!it->has_value(reserved_token::close_square)) {
-								throw syntax_error("Expected closing ]'", it->get_line_number(), it->get_char_index());
+							if (!it->hasValue(reservedToken::close_square)) {
+								throw syntaxError("Expected closing ]'", it->getLineNumber(), it->getCharIndex());
 							}
 							break;
-						case node_operation::ternary:
+						case nodeOperation::ternary:
 							++it;
 							operand_stack.push(parse_expression_tree_impl(context, it, true, false));
-							if (!it->has_value(reserved_token::colon)) {
-								throw syntax_error("Expected ':'", it->get_line_number(), it->get_char_index());
+							if (!it->hasValue(reservedToken::colon)) {
+								throw syntaxError("Expected ':'", it->getLineNumber(), it->getCharIndex());
 							}
 							break;
 						default:
@@ -447,23 +447,23 @@ namespace cobalt {
 					expected_operand = (oi.precedence != operator_precedence::postfix);
 				} else {
 					if (!expected_operand) {
-						throw unexpected_syntax_error(
-							std::to_string(it->get_value()),
-							it->get_line_number(),
-							it->get_char_index()
+						throw unexpectedSyntaxError(
+							std::to_string(it->getValue()),
+							it->getLineNumber(),
+							it->getCharIndex()
 						);
 					}
-					if (it->is_number()) {
+					if (it->isNumber()) {
 						operand_stack.push(std::make_unique<node>(
-							context, it->get_number(), std::vector<node_ptr>(), it->get_line_number(), it->get_char_index())
+							context, it->getNumber(), std::vector<node_ptr>(), it->getLineNumber(), it->getCharIndex())
 						);
-					} else if (it->is_string()) {
+					} else if (it->isString()) {
 						operand_stack.push(std::make_unique<node>(
-							context, it->get_string(), std::vector<node_ptr>(), it->get_line_number(), it->get_char_index())
+							context, it->getString(), std::vector<node_ptr>(), it->getLineNumber(), it->getCharIndex())
 						);
 					} else {
 						operand_stack.push(std::make_unique<node>(
-							context, it->get_identifier(), std::vector<node_ptr>(), it->get_line_number(), it->get_char_index())
+							context, it->getIdentifier(), std::vector<node_ptr>(), it->getLineNumber(), it->getCharIndex())
 						);
 					}
 					expected_operand = false;
@@ -474,28 +474,28 @@ namespace cobalt {
 				if (allow_empty && operand_stack.empty() && operator_stack.empty()) {
 					return node_ptr();
 				} else {
-					throw syntax_error("Operand expected", it->get_line_number(), it->get_char_index());
+					throw syntaxError("Operand expected", it->getLineNumber(), it->getCharIndex());
 				}
 			}
 			
 			while(!operator_stack.empty()) {
-				pop_one_operator(operator_stack, operand_stack, context, it->get_line_number(), it->get_char_index());
+				pop_one_operator(operator_stack, operand_stack, context, it->getLineNumber(), it->getCharIndex());
 			}
 			
 			if (operand_stack.size() != 1 || !operator_stack.empty()) {
-				throw compiler_error("Failed to parse an expression", it->get_line_number(), it->get_char_index());
+				throw compilerError("Failed to parse an expression", it->getLineNumber(), it->getCharIndex());
 			}
 			
 			return std::move(operand_stack.top());
 		}
 	}
 	
-	node_ptr parse_expression_tree(
-		compiler_context& context, tokens_iterator& it, type_handle type_id, bool allow_comma
+	node_ptr parseExpressionTree(
+		compilerContext& context, tokensIterator& it, typeHandle typeID, bool allow_comma
 	) {
-		node_ptr ret = parse_expression_tree_impl(context, it, allow_comma, type_id == type_registry::get_void_handle());
+		node_ptr ret = parse_expression_tree_impl(context, it, allow_comma, typeID == typeRegistry::getVoidHandle());
 		if (ret) {
-			ret->check_conversion(type_id, false);
+			ret->checkConversion(typeID, false);
 		}
 		return ret;
 	}

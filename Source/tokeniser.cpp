@@ -30,14 +30,14 @@ namespace cobalt {
 		}
 		
 		token fetch_word(push_back_stream& stream) {
-			size_t line_number = stream.line_number();
-			size_t char_index = stream.char_index();
+			size_t lineNumber = stream.lineNumber();
+			size_t charIndex = stream.charIndex();
 
 			std::string word;
 			
 			int c = stream();
 			
-			bool is_number = isdigit(c);
+			bool isNumber = isdigit(c);
 			
 			do {
 				word.push_back(char(c));
@@ -48,12 +48,12 @@ namespace cobalt {
 					word.pop_back();
 					break;
 				}
-			} while (get_character_type(c) == character_type::alphanum || (is_number && c == '.'));
+			} while (get_character_type(c) == character_type::alphanum || (isNumber && c == '.'));
 			
 			stream.push_back(c);
 			
-			if (std::optional<reserved_token> t  = get_keyword(word)) {
-				return token(*t, line_number, char_index);
+			if (std::optional<reservedToken> t  = getKeyword(word)) {
+				return token(*t, lineNumber, charIndex);
 			} else {
 				if (std::isdigit(word.front())) {
 					char* endptr;
@@ -62,40 +62,40 @@ namespace cobalt {
 						num = strtod(word.c_str(), &endptr);
 						if (*endptr != 0) {
 							size_t remaining = word.size() - (endptr - word.c_str());
-							throw unexpected_error(
+							throw unexpectedError(
 								std::string(1, char(*endptr)),
-								stream.line_number(),
-								stream.char_index() - remaining
+								stream.lineNumber(),
+								stream.charIndex() - remaining
 							);
 						}
 					}
-					return token(num, line_number, char_index);
+					return token(num, lineNumber, charIndex);
 				} else {
-					return token(identifier{std::move(word)}, line_number, char_index);
+					return token(identifier{std::move(word)}, lineNumber, charIndex);
 				}
 			}
 		}
 		
 		token fetch_operator(push_back_stream& stream) {
-			size_t line_number = stream.line_number();
-			size_t char_index = stream.char_index();
+			size_t lineNumber = stream.lineNumber();
+			size_t charIndex = stream.charIndex();
 
-			if (std::optional<reserved_token> t = get_operator(stream)) {
-				return token(*t, line_number, char_index);
+			if (std::optional<reservedToken> t = getOperator(stream)) {
+				return token(*t, lineNumber, charIndex);
 			} else {
 				std::string unexpected;
-				size_t err_line_number = stream.line_number();
-				size_t err_char_index = stream.char_index();
+				size_t err_line_number = stream.lineNumber();
+				size_t err_char_index = stream.charIndex();
 				for (int c = stream(); get_character_type(c) == character_type::punct; c = stream()) {
 					unexpected.push_back(char(c));
 				}
-				throw unexpected_error(unexpected, err_line_number, err_char_index);
+				throw unexpectedError(unexpected, err_line_number, err_char_index);
 			}
 		}
 		
 		token fetch_string(push_back_stream& stream) {
-			size_t line_number = stream.line_number();
-			size_t char_index = stream.char_index();
+			size_t lineNumber = stream.lineNumber();
+			size_t charIndex = stream.charIndex();
 
 			std::string str;
 			
@@ -130,9 +130,9 @@ namespace cobalt {
 							case '\n':
 							case '\r':
 								stream.push_back(c);
-								throw parsing_error("Expected closing '\"'", stream.line_number(), stream.char_index());
+								throw parsingError("Expected closing '\"'", stream.lineNumber(), stream.charIndex());
 							case '"':
-								return token(std::move(str), line_number, char_index);
+								return token(std::move(str), lineNumber, charIndex);
 							default:
 								str.push_back(c);
 						}
@@ -140,7 +140,7 @@ namespace cobalt {
 				}
 			}
 			stream.push_back(c);
-			throw parsing_error("Expected closing '\"'", stream.line_number(), stream.char_index());
+			throw parsingError("Expected closing '\"'", stream.lineNumber(), stream.charIndex());
 		}
 		
 		void skip_line_comment(push_back_stream& stream) {
@@ -166,17 +166,17 @@ namespace cobalt {
 			} while (get_character_type(c) != character_type::eof);
 
 			stream.push_back(c);
-			throw parsing_error("Expected closing '*/'", stream.line_number(), stream.char_index());
+			throw parsingError("Expected closing '*/'", stream.lineNumber(), stream.charIndex());
 		}
 	
 		token tokenize(push_back_stream& stream) {
 			while (true) {
-				size_t line_number = stream.line_number();
-				size_t char_index = stream.char_index();
+				size_t lineNumber = stream.lineNumber();
+				size_t charIndex = stream.charIndex();
 				int c = stream();
 				switch (get_character_type(c)) {
 					case character_type::eof:
-						return {eof(), line_number, char_index};
+						return {eof(), lineNumber, charIndex};
 					case character_type::space:
 						continue;
 					case character_type::alphanum:
@@ -210,7 +210,7 @@ namespace cobalt {
 		}
 	}
 	
-	tokens_iterator::tokens_iterator(push_back_stream& stream):
+	tokensIterator::tokensIterator(push_back_stream& stream):
 		_current(eof(), 0, 0),
 		_get_next_token([&stream](){
 			return tokenize(stream);
@@ -219,7 +219,7 @@ namespace cobalt {
 		++(*this);
 	}
 	
-	tokens_iterator::tokens_iterator(std::deque<token>& tokens):
+	tokensIterator::tokensIterator(std::deque<token>& tokens):
 		_current(eof(), 0, 0),
 		_get_next_token([&tokens](){
 			if (tokens.empty()) {
@@ -234,21 +234,21 @@ namespace cobalt {
 		++(*this);
 	}
 
-	tokens_iterator& tokens_iterator::operator++() {
+	tokensIterator& tokensIterator::operator++() {
 		_current = _get_next_token();
 		return *this;
 	}
 	
-	const token& tokens_iterator::operator*() const {
+	const token& tokensIterator::operator*() const {
 		return _current;
 	}
 	
-	const token* tokens_iterator::operator->() const {
+	const token* tokensIterator::operator->() const {
 		return &_current;
 	}
 
-	tokens_iterator::operator bool() const {
-		return !_current.is_eof();
+	tokensIterator::operator bool() const {
+		return !_current.isEof();
 	}
 }
 

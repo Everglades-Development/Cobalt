@@ -16,7 +16,7 @@ namespace cobalt {
 		};
 		
 		template<typename T>
-		struct is_boxed<std::shared_ptr<variable_impl<T> >, T> {
+		struct is_boxed<std::shared_ptr<variableImpl<T> >, T> {
 			static const bool value = true;
 		};
 		
@@ -28,7 +28,7 @@ namespace cobalt {
 		template <typename T>
 		auto unbox(T&& t) {
 			if constexpr (std::is_same<typename remove_cvref<T>::type, larray>::value) {
-				return clone_variable_value(t->value);
+				return cloneVariableValue(t->value);
 			} else {
 				return t->value;
 			}
@@ -41,7 +41,7 @@ namespace cobalt {
 			} else if constexpr(is_boxed<From, To>::value) {
 				return unbox(std::forward<From>(from));
 			} else if constexpr(std::is_same<To, string>::value) {
-				return convert_to_string(from);
+				return convertToString(from);
 			} else {
 				static_assert(std::is_void<To>::value);
 			}
@@ -81,8 +81,8 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
-				return convert<R>(context.global(_idx)->template static_pointer_downcast<T>());
+			R evaluate(runtimeContext& context) const override {
+				return convert<R>(context.global(_idx)->template staticPointerDowncast<T>());
 			}
 		};
 		
@@ -96,8 +96,8 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
-				return convert<R>(context.local(_idx)->template static_pointer_downcast<T>());
+			R evaluate(runtimeContext& context) const override {
+				return convert<R>(context.local(_idx)->template staticPointerDowncast<T>());
 			}
 		};
 		
@@ -111,7 +111,7 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				return convert<R>(context.get_function(_idx));
 			}
 		};
@@ -126,7 +126,7 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				return convert<R>(_c);
 			}
 		};
@@ -137,7 +137,7 @@ namespace cobalt {
 			std::tuple<typename expression<Ts>::ptr...> _exprs;
 			
 			template<typename... Exprs>
-			R evaluate_tuple(runtime_context& context, const Exprs&... exprs) const {
+			R evaluate_tuple(runtimeContext& context, const Exprs&... exprs) const {
 				if constexpr(std::is_same<R, void>::value) {
 					O()(std::move(exprs->evaluate(context))...);
 				} else {
@@ -150,7 +150,7 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				return std::apply(
 					[&](const auto&... exprs){
 						return this->evaluate_tuple(context, exprs...);
@@ -197,7 +197,7 @@ namespace cobalt {
 		);
 		
 		UNARY_EXPRESSION(tostring,
-			return convert_to_string(t1);
+			return convertToString(t1);
 		);
 
 #undef UNARY_EXPRESSION
@@ -327,7 +327,7 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				_expr1->evaluate(context);
 				
 				if constexpr(std::is_same<R, void>::value) {
@@ -350,7 +350,7 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				return convert<R>(_expr1->evaluate(context) && _expr2->evaluate(context));
 			}
 		};
@@ -367,7 +367,7 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				return convert<R>(_expr1->evaluate(context) || _expr2->evaluate(context));
 			}
 		};
@@ -390,7 +390,7 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				if constexpr (std::is_same<R, void>::value) {
 					_expr1->evaluate(context) ? _expr2->evaluate(context) : _expr3->evaluate(context);
 				} else {
@@ -421,10 +421,10 @@ namespace cobalt {
 			
 			static auto to_lvalue_impl(lvalue v) {
 				if constexpr(std::is_same<larray, A>::value) {
-					return v->static_pointer_downcast<T>();
+					return v->staticPointerDowncast<T>();
 				} else {
 					static_assert(std::is_same<array, A>::value);
-					return std::static_pointer_cast<variable_impl<T> >(v);
+					return std::static_pointer_cast<variableImpl<T> >(v);
 				}
 			}
 		public:
@@ -435,11 +435,11 @@ namespace cobalt {
 			{
 			}
 		
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				A arr = _expr1->evaluate(context);
 				int idx = int(_expr2->evaluate(context));
 				
-				runtime_assertion(idx >= 0, "Negative index is invalid");
+				runtimeAssertion(idx >= 0, "Negative index is invalid");
 				
 				while (idx >= value(arr).size()) {
 					value(arr).push_back(_init->evaluate(context));
@@ -469,10 +469,10 @@ namespace cobalt {
 			
 			static auto to_lvalue_impl(lvalue v) {
 				if constexpr(std::is_same<larray, A>::value) {
-					return v->static_pointer_downcast<T>();
+					return v->staticPointerDowncast<T>();
 				} else {
 					static_assert(std::is_same<array, A>::value);
-					return std::static_pointer_cast<variable_impl<T> >(v);
+					return std::static_pointer_cast<variableImpl<T> >(v);
 				}
 			}
 		public:
@@ -482,7 +482,7 @@ namespace cobalt {
 			{
 			}
 		
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				A tup = _expr->evaluate(context);
 				
 				return convert<R>(
@@ -508,8 +508,8 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
-				std::vector<variable_ptr> params;
+			R evaluate(runtimeContext& context) const override {
+				std::vector<variablePtr> params;
 				params.reserve(_exprs.size());
 			
 				for (size_t i = 0; i < _exprs.size(); ++i) {
@@ -522,7 +522,7 @@ namespace cobalt {
 					context.call(f, std::move(params));
 				} else {
 					return convert<R>(std::move(
-						std::static_pointer_cast<variable_impl<T> >(context.call(f, std::move(params)))->value
+						std::static_pointer_cast<variableImpl<T> >(context.call(f, std::move(params)))->value
 					));
 				}
 			}
@@ -540,7 +540,7 @@ namespace cobalt {
 			{
 			}
 			
-			R evaluate(runtime_context& context) const override {
+			R evaluate(runtimeContext& context) const override {
 				if constexpr(std::is_same<void, R>()) {
 					for (const expression<lvalue>::ptr& expr : _exprs) {
 						expr->evaluate(context);
@@ -565,8 +565,8 @@ namespace cobalt {
 			{
 			}
 			
-			lvalue evaluate(runtime_context& context) const override {
-				return std::make_shared<variable_impl<T> >(_expr->evaluate(context));
+			lvalue evaluate(runtimeContext& context) const override {
+				return std::make_shared<variableImpl<T> >(_expr->evaluate(context));
 			}
 		};
 		
@@ -584,18 +584,18 @@ namespace cobalt {
 			{
 			}
 			
-			lvalue evaluate(runtime_context& context) const override {
+			lvalue evaluate(runtimeContext& context) const override {
 				tuple ret;
 				
 				for (const expression<lvalue>::ptr& expr : _exprs) {
 					ret.push_back(expr->evaluate(context));
 				}
 				
-				return std::make_unique<variable_impl<tuple> >(std::move(ret));
+				return std::make_unique<variableImpl<tuple> >(std::move(ret));
 			}
 		};
 		
-		expression<lvalue>::ptr build_lvalue_expression(type_handle type_id, const node_ptr& np, compiler_context& context);
+		expression<lvalue>::ptr build_lvalue_expression(typeHandle typeID, const node_ptr& np, compilerContext& context);
 		
 #define RETURN_EXPRESSION_OF_TYPE(T)\
 	if constexpr(is_convertible<T, R>::value) {\
@@ -606,46 +606,46 @@ namespace cobalt {
 	}
 
 #define CHECK_IDENTIFIER(T1)\
-	if (std::holds_alternative<identifier>(np->get_value())) {\
-		const identifier& id = std::get<identifier>(np->get_value());\
-		const identifier_info* info = context.find(id.name);\
-		switch (info->get_scope()) {\
-			case identifier_scope::global_variable:\
+	if (std::holds_alternative<identifier>(np->getValue())) {\
+		const identifier& id = std::get<identifier>(np->getValue());\
+		const identifierInfo* info = context.find(id.name);\
+		switch (info->getScope()) {\
+			case identifierScope::global_variable:\
 				return std::make_unique<global_variable_expression<R, T1> >(info->index());\
-			case identifier_scope::local_variable:\
+			case identifierScope::local_variable:\
 				return std::make_unique<local_variable_expression<R, T1> >(info->index());\
-			case identifier_scope::function:\
+			case identifierScope::function:\
 				break;\
 		}\
 	}
 
 #define CHECK_FUNCTION()\
-	if (std::holds_alternative<identifier>(np->get_value())) {\
-		const identifier& id = std::get<identifier>(np->get_value());\
-		const identifier_info* info = context.find(id.name);\
-		switch (info->get_scope()) {\
-			case identifier_scope::global_variable:\
-			case identifier_scope::local_variable:\
+	if (std::holds_alternative<identifier>(np->getValue())) {\
+		const identifier& id = std::get<identifier>(np->getValue());\
+		const identifierInfo* info = context.find(id.name);\
+		switch (info->getScope()) {\
+			case identifierScope::global_variable:\
+			case identifierScope::local_variable:\
 				break;\
-			case identifier_scope::function:\
+			case identifierScope::function:\
 				return std::make_unique<function_expression<R> >(info->index());\
 		}\
 	}
 
 #define CHECK_UNARY_OPERATION(name, T1)\
-	case node_operation::name:\
+	case nodeOperation::name:\
 		return expression_ptr(\
 			std::make_unique<name##_expression<R, T1> > (\
-				expression_builder<T1>::build_expression(np->get_children()[0], context)\
+				expression_builder<T1>::build_expression(np->getChildren()[0], context)\
 			)\
 		);
 
 #define CHECK_SIZE_OPERATION()\
-	case node_operation::size:\
-		if (std::holds_alternative<array_type>(*(np->get_children()[0]->get_type_id()))) {\
+	case nodeOperation::size:\
+		if (std::holds_alternative<arrayType>(*(np->getChildren()[0]->getTypeID()))) {\
 			return expression_ptr(\
 				std::make_unique<size_expression<R, larray> > (\
-					expression_builder<larray>::build_expression(np->get_children()[0], context)\
+					expression_builder<larray>::build_expression(np->getChildren()[0], context)\
 				)\
 			);\
 		} else {\
@@ -655,107 +655,107 @@ namespace cobalt {
 		}
 
 #define CHECK_TO_STRING_OPERATION()\
-	case node_operation::tostring:\
-		if (np->get_children()[0]->is_lvalue()) {\
+	case nodeOperation::tostring:\
+		if (np->getChildren()[0]->is_lvalue()) {\
 			return expression_ptr(std::make_unique<tostring_expression<R, lvalue> > (\
-				expression_builder<lvalue>::build_expression(np->get_children()[0], context)\
+				expression_builder<lvalue>::build_expression(np->getChildren()[0], context)\
 			));\
 		}\
 		return std::visit(overloaded{\
-			[&](simple_type st) {\
+			[&](simpleType st) {\
 				switch (st) {\
-					case simple_type::number:\
+					case simpleType::number:\
 						return expression_ptr(std::make_unique<tostring_expression<R, number> > (\
-							expression_builder<number>::build_expression(np->get_children()[0], context)\
+							expression_builder<number>::build_expression(np->getChildren()[0], context)\
 						));\
-					case simple_type::string:\
+					case simpleType::string:\
 						return expression_ptr(std::make_unique<tostring_expression<R, string> > (\
-							expression_builder<string>::build_expression(np->get_children()[0], context)\
+							expression_builder<string>::build_expression(np->getChildren()[0], context)\
 						));\
-					case simple_type::nothing:\
+					case simpleType::nothing:\
 						throw expression_builder_error();\
 						return expression_ptr();\
 				}\
 			},\
-			[&](const function_type&) {\
+			[&](const functionType&) {\
 				return expression_ptr(std::make_unique<tostring_expression<R, function> > (\
-					expression_builder<function>::build_expression(np->get_children()[0], context)\
+					expression_builder<function>::build_expression(np->getChildren()[0], context)\
 				));\
 			},\
-			[&](const array_type&) {\
+			[&](const arrayType&) {\
 				return expression_ptr(std::make_unique<tostring_expression<R, array> > (\
-					expression_builder<array>::build_expression(np->get_children()[0], context)\
+					expression_builder<array>::build_expression(np->getChildren()[0], context)\
 				));\
 			},\
-			[&](const tuple_type&) {\
+			[&](const tupleType&) {\
 				return expression_ptr(std::make_unique<tostring_expression<R, tuple> > (\
-					expression_builder<tuple>::build_expression(np->get_children()[0], context)\
+					expression_builder<tuple>::build_expression(np->getChildren()[0], context)\
 				));\
 			},\
-			[&](const init_list_type&) {\
+			[&](const initListType&) {\
 				return expression_ptr(std::make_unique<tostring_expression<R, initializer_list> > (\
-					expression_builder<initializer_list>::build_expression(np->get_children()[0], context)\
+					expression_builder<initializer_list>::build_expression(np->getChildren()[0], context)\
 				));\
 			}\
-		}, *np->get_children()[0]->get_type_id());
+		}, *np->getChildren()[0]->getTypeID());
 
 #define CHECK_BINARY_OPERATION(name, T1, T2)\
-	case node_operation::name:\
+	case nodeOperation::name:\
 		return expression_ptr(\
 			std::make_unique<name##_expression<R, T1, T2> > (\
-				expression_builder<T1>::build_expression(np->get_children()[0], context),\
-				expression_builder<T2>::build_expression(np->get_children()[1], context)\
+				expression_builder<T1>::build_expression(np->getChildren()[0], context),\
+				expression_builder<T2>::build_expression(np->getChildren()[1], context)\
 			)\
 		);
 
 #define CHECK_TERNARY_OPERATION(name, T1, T2, T3)\
-	case node_operation::name:\
+	case nodeOperation::name:\
 		return expression_ptr(\
 			std::make_unique<name##_expression<R, T1, T2, T3> > (\
-				expression_builder<T1>::build_expression(np->get_children()[0], context),\
-				expression_builder<T2>::build_expression(np->get_children()[1], context),\
-				expression_builder<T3>::build_expression(np->get_children()[2], context)\
+				expression_builder<T1>::build_expression(np->getChildren()[0], context),\
+				expression_builder<T2>::build_expression(np->getChildren()[1], context),\
+				expression_builder<T3>::build_expression(np->getChildren()[2], context)\
 			)\
 		);
 
 #define CHECK_COMPARISON_OPERATION(name)\
-		case node_operation::name:\
+		case nodeOperation::name:\
 			if (\
-				np->get_children()[0]->get_type_id() == type_registry::get_number_handle() &&\
-				np->get_children()[1]->get_type_id() == type_registry::get_number_handle()\
+				np->getChildren()[0]->getTypeID() == typeRegistry::getNumberHandle() &&\
+				np->getChildren()[1]->getTypeID() == typeRegistry::getNumberHandle()\
 			) {\
 				return expression_ptr(\
 					std::make_unique<name##_expression<R, number, number> > (\
-						expression_builder<number>::build_expression(np->get_children()[0], context),\
-						expression_builder<number>::build_expression(np->get_children()[1], context)\
+						expression_builder<number>::build_expression(np->getChildren()[0], context),\
+						expression_builder<number>::build_expression(np->getChildren()[1], context)\
 					)\
 				);\
 			} else {\
 				return expression_ptr(\
 					std::make_unique<name##_expression<R, string, string> > (\
-						expression_builder<string>::build_expression(np->get_children()[0], context),\
-						expression_builder<string>::build_expression(np->get_children()[1], context)\
+						expression_builder<string>::build_expression(np->getChildren()[0], context),\
+						expression_builder<string>::build_expression(np->getChildren()[1], context)\
 					)\
 				);\
 			}
 
 #define CHECK_INDEX_OPERATION(T, A)\
-		case node_operation::index:\
+		case nodeOperation::index:\
 			{\
-				const tuple_type* tt = std::get_if<tuple_type>(np->get_children()[0]->get_type_id());\
+				const tupleType* tt = std::get_if<tupleType>(np->getChildren()[0]->getTypeID());\
 				if (tt) {\
 					return expression_ptr(\
 						std::make_unique<member_expression<R, A, T> >(\
-							expression_builder<A>::build_expression(np->get_children()[0], context),\
-							size_t(np->get_children()[1]->get_number())\
+							expression_builder<A>::build_expression(np->getChildren()[0], context),\
+							size_t(np->getChildren()[1]->getNumber())\
 						)\
 					);\
 				} else {\
-					const array_type* at = std::get_if<array_type>(np->get_children()[0]->get_type_id());\
+					const arrayType* at = std::get_if<arrayType>(np->getChildren()[0]->getTypeID());\
 					return expression_ptr(\
 						std::make_unique<index_expression<R, A, T> >(\
-							expression_builder<A>::build_expression(np->get_children()[0], context),\
-							expression_builder<number>::build_expression(np->get_children()[1], context),\
+							expression_builder<A>::build_expression(np->getChildren()[0], context),\
+							expression_builder<number>::build_expression(np->getChildren()[1], context),\
 							build_default_initialization(at->inner_type_id) \
 						)\
 					);\
@@ -763,18 +763,18 @@ namespace cobalt {
 			}
 
 #define CHECK_CALL_OPERATION(T)\
-	case node_operation::call:\
+	case nodeOperation::call:\
 	{\
 		std::vector<expression<lvalue>::ptr> arguments;\
-		const function_type* ft = std::get_if<function_type>(np->get_children()[0]->get_type_id());\
-		for (size_t i = 1; i < np->get_children().size(); ++i) {\
-			const node_ptr& child = np->get_children()[i];\
+		const functionType* ft = std::get_if<functionType>(np->getChildren()[0]->getTypeID());\
+		for (size_t i = 1; i < np->getChildren().size(); ++i) {\
+			const node_ptr& child = np->getChildren()[i];\
 			if (\
 				child->is_node_operation() &&\
-				std::get<node_operation>(child->get_value()) == node_operation::param\
+				std::get<nodeOperation>(child->getValue()) == nodeOperation::param\
 			) {\
 				arguments.push_back(\
-					build_lvalue_expression(ft->param_type_id[i-1].type_id, child->get_children()[0], context)\
+					build_lvalue_expression(ft->param_type_id[i-1].typeID, child->getChildren()[0], context)\
 				);\
 			} else {\
 				arguments.push_back(\
@@ -784,7 +784,7 @@ namespace cobalt {
 		}\
 		return expression_ptr(\
 			std::make_unique<call_expression<R, T> >(\
-				expression_builder<function>::build_expression(np->get_children()[0], context),\
+				expression_builder<function>::build_expression(np->getChildren()[0], context),\
 				std::move(arguments)\
 			)\
 		);\
@@ -795,8 +795,8 @@ namespace cobalt {
 		private:
 			using expression_ptr = typename expression<R>::ptr;
 		
-			static expression_ptr build_void_expression(const node_ptr& np, compiler_context& context) {
-				switch (std::get<node_operation>(np->get_value())) {
+			static expression_ptr build_void_expression(const node_ptr& np, compilerContext& context) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_BINARY_OPERATION(comma, void, void);
 					CHECK_TERNARY_OPERATION(ternary, number, void, void);
 					CHECK_CALL_OPERATION(void);
@@ -805,16 +805,16 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_number_expression(const node_ptr& np, compiler_context& context) {
-				if (std::holds_alternative<double>(np->get_value())) {
+			static expression_ptr build_number_expression(const node_ptr& np, compilerContext& context) {
+				if (std::holds_alternative<double>(np->getValue())) {
 					return std::make_unique<constant_expression<R, number>>(
-						std::get<double>(np->get_value())
+						std::get<double>(np->getValue())
 					);
 				}
 				
 				CHECK_IDENTIFIER(lnumber);
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_UNARY_OPERATION(postinc, lnumber);
 					CHECK_UNARY_OPERATION(postdec, lnumber);
 					CHECK_UNARY_OPERATION(positive, number);
@@ -850,10 +850,10 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_lnumber_expression(const node_ptr& np, compiler_context& context) {
+			static expression_ptr build_lnumber_expression(const node_ptr& np, compilerContext& context) {
 				CHECK_IDENTIFIER(lnumber);
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_UNARY_OPERATION(preinc, lnumber);
 					CHECK_UNARY_OPERATION(predec, lnumber);
 					CHECK_BINARY_OPERATION(assign, lnumber, number);
@@ -876,16 +876,16 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_string_expression(const node_ptr& np, compiler_context& context) {
-				if (std::holds_alternative<std::string>(np->get_value())) {
+			static expression_ptr build_string_expression(const node_ptr& np, compilerContext& context) {
+				if (std::holds_alternative<std::string>(np->getValue())) {
 					return std::make_unique<constant_expression<R, string>>(
-						std::make_shared<std::string>(std::get<std::string>(np->get_value()))
+						std::make_shared<std::string>(std::get<std::string>(np->getValue()))
 					);
 				}
 				
 				CHECK_IDENTIFIER(lstring);
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_TO_STRING_OPERATION();
 					CHECK_BINARY_OPERATION(concat, string, string);
 					CHECK_BINARY_OPERATION(comma, void, string);
@@ -897,10 +897,10 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_lstring_expression(const node_ptr& np, compiler_context& context) {
+			static expression_ptr build_lstring_expression(const node_ptr& np, compilerContext& context) {
 				CHECK_IDENTIFIER(lstring);
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_BINARY_OPERATION(assign, lstring, string);
 					CHECK_BINARY_OPERATION(concat_assign, lstring, string);
 					CHECK_BINARY_OPERATION(comma, void, lstring);
@@ -911,10 +911,10 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_array_expression(const node_ptr& np, compiler_context& context) {
+			static expression_ptr build_array_expression(const node_ptr& np, compilerContext& context) {
 				CHECK_IDENTIFIER(larray);
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_BINARY_OPERATION(comma, void, array);
 					CHECK_INDEX_OPERATION(array, array);
 					CHECK_TERNARY_OPERATION(ternary, number, array, array);
@@ -924,10 +924,10 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_larray_expression(const node_ptr& np, compiler_context& context) {
+			static expression_ptr build_larray_expression(const node_ptr& np, compilerContext& context) {
 				CHECK_IDENTIFIER(larray);
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_BINARY_OPERATION(assign, larray, array);
 					CHECK_BINARY_OPERATION(comma, void, larray);
 					CHECK_INDEX_OPERATION(larray, larray);
@@ -937,11 +937,11 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_function_expression(const node_ptr& np, compiler_context& context) {
+			static expression_ptr build_function_expression(const node_ptr& np, compilerContext& context) {
 				CHECK_IDENTIFIER(lfunction);
 				CHECK_FUNCTION();
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_BINARY_OPERATION(comma, void, function);
 					CHECK_INDEX_OPERATION(function, array);
 					CHECK_TERNARY_OPERATION(ternary, number, function, function);
@@ -951,10 +951,10 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_lfunction_expression(const node_ptr& np, compiler_context& context) {
+			static expression_ptr build_lfunction_expression(const node_ptr& np, compilerContext& context) {
 				CHECK_IDENTIFIER(lfunction);
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_BINARY_OPERATION(assign, lfunction, function);
 					CHECK_BINARY_OPERATION(comma, void, lfunction);
 					CHECK_INDEX_OPERATION(lfunction, larray);
@@ -964,10 +964,10 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_tuple_expression(const node_ptr& np, compiler_context& context) {
+			static expression_ptr build_tuple_expression(const node_ptr& np, compilerContext& context) {
 				CHECK_IDENTIFIER(ltuple);
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_BINARY_OPERATION(comma, void, tuple);
 					CHECK_INDEX_OPERATION(tuple, array);
 					CHECK_TERNARY_OPERATION(ternary, number, tuple, tuple);
@@ -977,10 +977,10 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_ltuple_expression(const node_ptr& np, compiler_context& context) {
+			static expression_ptr build_ltuple_expression(const node_ptr& np, compilerContext& context) {
 				CHECK_IDENTIFIER(ltuple);
 				
-				switch (std::get<node_operation>(np->get_value())) {
+				switch (std::get<nodeOperation>(np->getValue())) {
 					CHECK_BINARY_OPERATION(assign, ltuple, tuple);
 					CHECK_BINARY_OPERATION(comma, void, ltuple);
 					CHECK_INDEX_OPERATION(ltuple, larray);
@@ -991,14 +991,14 @@ namespace cobalt {
 				}
 			}
 			
-			static expression_ptr build_initializer_list_expression(const node_ptr& np, compiler_context& context) {
-				switch (std::get<node_operation>(np->get_value())) {
-					case node_operation::init:
+			static expression_ptr build_initializer_list_expression(const node_ptr& np, compilerContext& context) {
+				switch (std::get<nodeOperation>(np->getValue())) {
+					case nodeOperation::init:
 						{
 							std::vector<expression<lvalue>::ptr> exprs;
-							exprs.reserve(np->get_children().size());
-							for (const node_ptr& child : np->get_children()) {
-								exprs.emplace_back(build_lvalue_expression(child->get_type_id(), child, context));
+							exprs.reserve(np->getChildren().size());
+							for (const node_ptr& child : np->getChildren()) {
+								exprs.emplace_back(build_lvalue_expression(child->getTypeID(), child, context));
 							}
 							return std::make_unique<init_expression<R> >(std::move(exprs));
 						}
@@ -1009,54 +1009,54 @@ namespace cobalt {
 				}
 			}
 		public:
-			static expression_ptr build_expression(const node_ptr& np, compiler_context& context) {
+			static expression_ptr build_expression(const node_ptr& np, compilerContext& context) {
 				return std::visit(overloaded{
-					[&](simple_type st){
+					[&](simpleType st){
 						switch (st) {
-							case simple_type::number:
+							case simpleType::number:
 								if (np->is_lvalue()) {
 									RETURN_EXPRESSION_OF_TYPE(lnumber);
 								} else {
 									RETURN_EXPRESSION_OF_TYPE(number);
 								}
-							case simple_type::string:
+							case simpleType::string:
 								if (np->is_lvalue()) {
 									RETURN_EXPRESSION_OF_TYPE(lstring);
 								} else {
 									RETURN_EXPRESSION_OF_TYPE(string);
 								}
-							case simple_type::nothing:
+							case simpleType::nothing:
 								RETURN_EXPRESSION_OF_TYPE(void);
 						}
 					},
-					[&](const function_type& ft) {
+					[&](const functionType& ft) {
 						if (np->is_lvalue()) {
 							RETURN_EXPRESSION_OF_TYPE(lfunction);
 						} else {
 							RETURN_EXPRESSION_OF_TYPE(function);
 						}
 					},
-					[&](const array_type& at) {
+					[&](const arrayType& at) {
 						if (np->is_lvalue()) {
 							RETURN_EXPRESSION_OF_TYPE(larray);
 						} else {
 							RETURN_EXPRESSION_OF_TYPE(array);
 						}
 					},
-					[&](const tuple_type& tt) {
+					[&](const tupleType& tt) {
 						if (np->is_lvalue()) {
 							RETURN_EXPRESSION_OF_TYPE(ltuple);
 						} else {
 							RETURN_EXPRESSION_OF_TYPE(tuple);
 						}
 					},
-					[&](const init_list_type& ilt) {
+					[&](const initListType& ilt) {
 						RETURN_EXPRESSION_OF_TYPE(initializer_list);
 					}
-				}, *np->get_type_id());
+				}, *np->getTypeID());
 			}
 			
-			static expression<lvalue>::ptr build_param_expression(const node_ptr& np, compiler_context& context) {
+			static expression<lvalue>::ptr build_param_expression(const node_ptr& np, compilerContext& context) {
 				return std::make_unique<param_expression<R> >(
 					expression_builder<R>::build_expression(np, context)
 				);
@@ -1075,47 +1075,47 @@ namespace cobalt {
 #undef CHECK_IDENTIFIER
 #undef RETURN_EXPRESSION_OF_TYPE
 
-		expression<lvalue>::ptr build_lvalue_expression(type_handle type_id, const node_ptr& np, compiler_context& context) {
+		expression<lvalue>::ptr build_lvalue_expression(typeHandle typeID, const node_ptr& np, compilerContext& context) {
 			return std::visit(overloaded{
-				[&](simple_type st){
+				[&](simpleType st){
 					switch (st) {
-						case simple_type::number:
+						case simpleType::number:
 							return expression_builder<number>::build_param_expression(np, context);
-						case simple_type::string:
+						case simpleType::string:
 							return expression_builder<string>::build_param_expression(np, context);
-						case simple_type::nothing:
+						case simpleType::nothing:
 							throw expression_builder_error();
 							return expression<lvalue>::ptr();
 					}
 				},
-				[&](const function_type&) {
+				[&](const functionType&) {
 					return expression_builder<function>::build_param_expression(np, context);
 				},
-				[&](const array_type&) {
+				[&](const arrayType&) {
 					return expression_builder<array>::build_param_expression(np, context);
 				},
-				[&](const tuple_type&) {
+				[&](const tupleType&) {
 					return expression_builder<tuple>::build_param_expression(np, context);
 				},
-				[&](const init_list_type&) {
+				[&](const initListType&) {
 					throw expression_builder_error();
 					return expression<lvalue>::ptr();
 				}
-			}, *type_id);
+			}, *typeID);
 		}
 		
         class empty_expression: public expression<void> {
-            void evaluate(runtime_context&) const override {
+            void evaluate(runtimeContext&) const override {
             }
         };
         
 		template<typename R>
-		typename expression<R>::ptr build_expression(type_handle type_id, compiler_context& context, tokens_iterator& it, bool allow_comma) {
-			size_t line_number = it->get_line_number();
-			size_t char_index = it->get_char_index();
+		typename expression<R>::ptr build_expression(typeHandle typeID, compilerContext& context, tokensIterator& it, bool allow_comma) {
+			size_t lineNumber = it->getLineNumber();
+			size_t charIndex = it->getCharIndex();
 			
 			try {
-				node_ptr np = parse_expression_tree(context, it, type_id, allow_comma);
+				node_ptr np = parseExpressionTree(context, it, typeID, allow_comma);
 				
 				if constexpr(std::is_same<void, R>::value) {
 					if (!np) {
@@ -1124,7 +1124,7 @@ namespace cobalt {
 				}
 				if constexpr(std::is_same<R, lvalue>::value) {
 					return build_lvalue_expression(
-						type_id,
+						typeID,
 						np,
 						context
 					);
@@ -1135,7 +1135,7 @@ namespace cobalt {
 					);
 				}
 			} catch (const expression_builder_error&) {
-				throw compiler_error("Expression building failed", line_number, char_index);
+				throw compilerError("Expression building failed", lineNumber, charIndex);
 			}
 		}
 		
@@ -1143,53 +1143,53 @@ namespace cobalt {
 		template <typename T>
 		class default_initialization_expression: public expression<lvalue> {
 		public:
-			lvalue evaluate(runtime_context &context) const override {
-				return std::make_shared<variable_impl<T> >(T{});
+			lvalue evaluate(runtimeContext &context) const override {
+				return std::make_shared<variableImpl<T> >(T{});
 			}
 		};
 	}
 
-	expression<void>::ptr build_void_expression(compiler_context& context, tokens_iterator& it) {
-		return build_expression<void>(type_registry::get_void_handle(), context, it, true);
+	expression<void>::ptr build_void_expression(compilerContext& context, tokensIterator& it) {
+		return build_expression<void>(typeRegistry::getVoidHandle(), context, it, true);
 	}
 	
-	expression<number>::ptr build_number_expression(compiler_context& context, tokens_iterator& it) {
-		return build_expression<number>(type_registry::get_number_handle(), context, it, true);
+	expression<number>::ptr build_number_expression(compilerContext& context, tokensIterator& it) {
+		return build_expression<number>(typeRegistry::getNumberHandle(), context, it, true);
 	}
 	
-	expression<lvalue>::ptr build_initialization_expression(
-		compiler_context& context,
-		tokens_iterator& it,
-		type_handle type_id,
+	expression<lvalue>::ptr build_initialisation_expression(
+		compilerContext& context,
+		tokensIterator& it,
+		typeHandle typeID,
 		bool allow_comma
 	) {
-		return build_expression<lvalue>(type_id, context, it, allow_comma);
+		return build_expression<lvalue>(typeID, context, it, allow_comma);
 	}
 
-	expression<lvalue>::ptr build_default_initialization(type_handle type_id) {
+	expression<lvalue>::ptr build_default_initialization(typeHandle typeID) {
 		return std::visit(overloaded{
-			[&](simple_type st){
+			[&](simpleType st){
 				switch (st) {
-					case simple_type::number:
+					case simpleType::number:
 						return expression<lvalue>::ptr(std::make_unique<default_initialization_expression<number> >());
-					case simple_type::string:
+					case simpleType::string:
 						return expression<lvalue>::ptr(std::make_unique<default_initialization_expression<string> >());
-					case simple_type::nothing:
+					case simpleType::nothing:
 						return expression<lvalue>::ptr(nullptr); //cannot happen
 				}
 			},
-			[&](const function_type& ft) {
+			[&](const functionType& ft) {
 				return expression<lvalue>::ptr(std::make_unique<default_initialization_expression<function> >());
 			},
-			[&](const array_type& at) {
+			[&](const arrayType& at) {
 				return expression<lvalue>::ptr(std::make_unique<default_initialization_expression<array> >());
 			},
-			[&](const tuple_type& tt) {
+			[&](const tupleType& tt) {
 				std::vector<expression<lvalue>::ptr> exprs;
 				
 				exprs.reserve(tt.inner_type_id.size());
 				
-				for (type_handle it : tt.inner_type_id) {
+				for (typeHandle it : tt.inner_type_id) {
 					exprs.emplace_back(build_default_initialization(it));
 				}
 				
@@ -1197,10 +1197,10 @@ namespace cobalt {
 					std::make_unique<tuple_initialization_expression>(std::move(exprs))
 				);
 			},
-			[&](const init_list_type& ilt) {
+			[&](const initListType& ilt) {
 				//cannot happen
 				return expression<lvalue>::ptr();
 			}
-		}, *type_id);
+		}, *typeID);
 	}
 }

@@ -9,11 +9,11 @@ namespace cobalt {
 	struct node;
 	using node_ptr=std::unique_ptr<node>;
 
-	class tokens_iterator;
+	class tokensIterator;
 
-	class compiler_context;
+	class compilerContext;
 
-	node_ptr parse_expression_tree(compiler_context& context, tokens_iterator& it, type_handle type_id, bool allow_comma);
+	node_ptr parseExpressionTree(compilerContext& context, tokensIterator& it, typeHandle typeID, bool allow_comma);
 }
 
 #endif /* expressionTreeParser_hpp */

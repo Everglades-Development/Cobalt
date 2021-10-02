@@ -18,7 +18,7 @@ namespace cobalt {
 				_fp(fopen(path, "rt"))
 			{
 				if (!_fp) {
-					throw file_not_found(std::string("'") + path + "' not found");
+					throw fileNotFound(std::string("'") + path + "' not found");
 				}
 			}
 			
@@ -39,21 +39,21 @@ namespace cobalt {
 		std::vector<std::pair<std::string, function> > _external_functions;
 		std::vector<std::string> _public_declarations;
 		std::unordered_map<std::string, std::shared_ptr<function> > _public_functions;
-		std::unique_ptr<runtime_context> _context;
+		std::unique_ptr<runtimeContext> _context;
 	public:
 		module_impl(){
 		}
 		
-		runtime_context* get_runtime_context() {
+		runtimeContext* getRuntimeContext() {
 			return _context.get();
 		}
 		
-		void add_public_function_declaration(std::string declaration, std::string name, std::shared_ptr<function> fptr) {
+		void addPublicFunctionDeclaration(std::string declaration, std::string name, std::shared_ptr<function> fptr) {
 			_public_declarations.push_back(std::move(declaration));
 			_public_functions.emplace(std::move(name), std::move(fptr));
 		}
 		
-		void add_external_function_impl(std::string declaration, function f) {
+		void addExternalFunctionImpl(std::string declaration, function f) {
 			_external_functions.emplace_back(std::move(declaration), std::move(f));
 		}
 		
@@ -64,27 +64,27 @@ namespace cobalt {
 			};
 			push_back_stream stream(&get);
 			
-			tokens_iterator it(stream);
+			tokensIterator it(stream);
 			
-			_context = std::make_unique<runtime_context>(compile(it, _external_functions, _public_declarations));
+			_context = std::make_unique<runtimeContext>(compile(it, _external_functions, _public_declarations));
 			
 			for (const auto& p : _public_functions) {
 				*p.second = _context->get_public_function(p.first.c_str());
 			}
 		}
 		
-		bool try_load(const char* path, std::ostream* err) noexcept{
+		bool tryLoad(const char* path, std::ostream* err) noexcept{
 			try {
 				load(path);
 				return true;
-			} catch(const file_not_found& e) {
+			} catch(const fileNotFound& e) {
 				if (err) {
 					*err << e.what() << std::endl;
 				}
 			} catch(const error& e) {
 				if (err) {
 					file f(path);
-					format_error(
+					formatError(
 						e,
 						[&](){
 							return f();
@@ -92,7 +92,7 @@ namespace cobalt {
 						*err
 					);
 				}
-			} catch(const runtime_error& e) {
+			} catch(const runtimeError& e) {
 				if (err) {
 					*err << e.what() << std::endl;
 				}
@@ -100,7 +100,7 @@ namespace cobalt {
 			return false;
 		}
 		
-		void reset_globals() {
+		void resetGlobals() {
 			if (_context) {
 				_context->initialize();
 			}
@@ -112,28 +112,28 @@ namespace cobalt {
 	{
 	}
 	
-	runtime_context* module::get_runtime_context() {
-		return _impl->get_runtime_context();
+	runtimeContext* module::getRuntimeContext() {
+		return _impl->getRuntimeContext();
 	}
 	
-	void module::add_external_function_impl(std::string declaration, function f) {
-		_impl->add_external_function_impl(std::move(declaration), std::move(f));
+	void module::addExternalFunctionImpl(std::string declaration, function f) {
+		_impl->addExternalFunctionImpl(std::move(declaration), std::move(f));
 	}
 
-	void module::add_public_function_declaration(std::string declaration, std::string name, std::shared_ptr<function> fptr) {
-		_impl->add_public_function_declaration(std::move(declaration), std::move(name), std::move(fptr));
+	void module::addPublicFunctionDeclaration(std::string declaration, std::string name, std::shared_ptr<function> fptr) {
+		_impl->addPublicFunctionDeclaration(std::move(declaration), std::move(name), std::move(fptr));
 	}
 	
 	void module::load(const char* path) {
 		_impl->load(path);
 	}
 	
-	bool module::try_load(const char* path, std::ostream* err) noexcept{
-		return _impl->try_load(path, err);
+	bool module::tryLoad(const char* path, std::ostream* err) noexcept{
+		return _impl->tryLoad(path, err);
 	}
 	
-	void module::reset_globals() {
-		_impl->reset_globals();
+	void module::resetGlobals() {
+		_impl->resetGlobals();
 	}
 	
 	module::~module() {

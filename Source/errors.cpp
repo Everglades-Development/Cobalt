@@ -2,10 +2,10 @@
 #include <sstream>
 
 namespace cobalt {
-	error::error(std::string message, size_t line_number, size_t char_index) noexcept :
+	error::error(std::string message, size_t lineNumber, size_t charIndex) noexcept :
 		_message(std::move(message)),
-		_line_number(line_number),
-		_char_index(char_index)
+		_line_number(lineNumber),
+		_char_index(charIndex)
 	{
 	}
 		
@@ -13,69 +13,69 @@ namespace cobalt {
 		return _message.c_str();
 	}
 		
-	size_t error::line_number() const noexcept {
+	size_t error::lineNumber() const noexcept {
 		return _line_number;
 	}
 	
-	size_t error::char_index() const noexcept {
+	size_t error::charIndex() const noexcept {
 		return _char_index;
 	}
 	
-	error parsing_error(std::string_view message, size_t line_number, size_t char_index) {
-		std::string error_message("Parsing error: ");
-		error_message += message;
-		return error(std::move(error_message), line_number, char_index);
+	error parsingError(std::string_view message, size_t lineNumber, size_t charIndex) {
+		std::string errorMessage("Parsing error: ");
+		errorMessage += message;
+		return error(std::move(errorMessage), lineNumber, charIndex);
 	}
 	
-	error syntax_error(std::string_view message, size_t line_number, size_t char_index) {
-		std::string error_message("Syntax error: ");
-		error_message += message;
-		return error(std::move(error_message), line_number, char_index);
+	error syntaxError(std::string_view message, size_t lineNumber, size_t charIndex) {
+		std::string errorMessage("Syntax error: ");
+		errorMessage += message;
+		return error(std::move(errorMessage), lineNumber, charIndex);
 	}
 	
-	error semantic_error(std::string_view message, size_t line_number, size_t char_index) {
-		std::string error_message("Semantic error: ");
-		error_message += message;
-		return error(std::move(error_message), line_number, char_index);
+	error semanticError(std::string_view message, size_t lineNumber, size_t charIndex) {
+		std::string errorMessage("Semantic error: ");
+		errorMessage += message;
+		return error(std::move(errorMessage), lineNumber, charIndex);
 	}
 	
-	error compiler_error(std::string_view message, size_t line_number, size_t char_index) {
-		std::string error_message("Compiler error: ");
-		error_message += message;
-		return error(std::move(error_message), line_number, char_index);
+	error compilerError(std::string_view message, size_t lineNumber, size_t charIndex) {
+		std::string errorMessage("Compiler error: ");
+		errorMessage += message;
+		return error(std::move(errorMessage), lineNumber, charIndex);
 	}
 	
-	error unexpected_error(std::string_view unexpected, size_t line_number, size_t char_index) {
+	error unexpectedError(std::string_view unexpected, size_t lineNumber, size_t charIndex) {
 		std::string message("Unexpected '");
 		message += unexpected;
 		message += "'";
-		return parsing_error(message, line_number, char_index);
+		return parsingError(message, lineNumber, charIndex);
 	}
 	
-	error unexpected_syntax_error(std::string_view unexpected, size_t line_number, size_t char_index) {
+	error unexpectedSyntaxError(std::string_view unexpected, size_t lineNumber, size_t charIndex) {
 		std::string message("Unexpected '");
 		message += unexpected;
 		message += "'";
-		return syntax_error(message, line_number, char_index);
+		return syntaxError(message, lineNumber, charIndex);
 	}
 	
-	error expected_syntax_error(std::string_view expected, size_t line_number, size_t char_index) {
+	error expectedSyntaxError(std::string_view expected, size_t lineNumber, size_t charIndex) {
 		std::string message("Expected '");
 		message += expected;
 		message += "'";
-		return syntax_error(message, line_number, char_index);
+		return syntaxError(message, lineNumber, charIndex);
 	}
 	
-	error undeclared_error(std::string_view undeclared, size_t line_number, size_t char_index) {
+	error undeclaredError(std::string_view undeclared, size_t lineNumber, size_t charIndex) {
 		std::string message("Undeclared identifier '");
 		message += undeclared;
 		message += "'";
-		return semantic_error(message, line_number, char_index);
+		return semanticError(message, lineNumber, charIndex);
 	}
 
-	error wrong_type_error(std::string_view source, std::string_view destination,
-	                       bool lvalue, size_t line_number,
-		size_t char_index) {
+	error wrongTypeError(std::string_view source, std::string_view destination,
+	                       bool lvalue, size_t lineNumber,
+		size_t charIndex) {
 		std::string message;
 		if (lvalue) {
 			message += "'";
@@ -88,31 +88,31 @@ namespace cobalt {
 			message +=  destination;
 			message += "'";
 		}
-		return semantic_error(message, line_number, char_index);
+		return semanticError(message, lineNumber, charIndex);
 	}
 	
-	error already_declared_error(std::string_view name, size_t line_number, size_t char_index) {
+	error alreadyDeclaredError(std::string_view name, size_t lineNumber, size_t charIndex) {
 		std::string message = "'";
 		message += name;
 		message += "' is already declared";
-		return semantic_error(message, line_number, char_index);
+		return semanticError(message, lineNumber, charIndex);
 	}
 
-	void format_error(const error& err, const get_character& source, std::ostream& output) {
-		output << "(" << (err.line_number() + 1) << ") " << err.what() << std::endl;
+	void formatError(const error& err, const get_character& source, std::ostream& output) {
+		output << "(" << (err.lineNumber() + 1) << ") " << err.what() << std::endl;
 		
-		size_t char_index = 0;
+		size_t charIndex = 0;
 		
-		for (size_t line_number = 0; line_number < err.line_number(); ++char_index) {
+		for (size_t lineNumber = 0; lineNumber < err.lineNumber(); ++charIndex) {
 			int c = source();
 			if (c < 0) {
 				return;
 			} else if (c == '\n') {
-				++line_number;
+				++lineNumber;
 			}
 		}
 
-		size_t index_in_line = err.char_index() - char_index;
+		size_t index_in_line = err.charIndex() - charIndex;
 		
 		std::string line;
 		for (size_t idx = 0;; ++idx) {
@@ -132,27 +132,27 @@ namespace cobalt {
 		output << "^" << std::endl;
 	}
 	
-	runtime_error::runtime_error(std::string message) noexcept:
+	runtimeError::runtimeError(std::string message) noexcept:
 		_message(std::move(message))
 	{
 	}
 		
-	const char* runtime_error::what() const noexcept {
+	const char* runtimeError::what() const noexcept {
 		return _message.c_str();
 	}
 	
-	void runtime_assertion(bool b, const char* message) {
+	void runtimeAssertion(bool b, const char* message) {
 		if (!b) {
-			throw runtime_error(message);
+			throw runtimeError(message);
 		}
 	}
 	
-	file_not_found::file_not_found(std::string message) noexcept:
+	fileNotFound::fileNotFound(std::string message) noexcept:
 		_message(std::move(message))
 	{
 	}
 		
-	const char* file_not_found::what() const noexcept {
+	const char* fileNotFound::what() const noexcept {
 		return _message.c_str();
 	}
 }

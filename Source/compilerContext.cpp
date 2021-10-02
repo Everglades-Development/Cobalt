@@ -1,34 +1,34 @@
 #include "compilerContext.hpp"
 
 namespace cobalt{
-	identifier_info::identifier_info(type_handle type_id, size_t index, identifier_scope scope) :
-		_type_id(type_id),
+	identifierInfo::identifierInfo(typeHandle typeID, size_t index, identifierScope scope) :
+		_type_id(typeID),
 		_index(index),
 		_scope(scope)
 	{
 	}
 	
-	type_handle identifier_info::type_id() const {
+	typeHandle identifierInfo::typeID() const {
 		return _type_id;
 	}
 	
-	size_t identifier_info::index() const {
+	size_t identifierInfo::index() const {
 		return _index;
 	}
 	
-	identifier_scope identifier_info::get_scope() const {
+	identifierScope identifierInfo::getScope() const {
 		return _scope;
 	}
 
-	const identifier_info* identifier_lookup::insert_identifier(std::string name, type_handle type_id, size_t index, identifier_scope scope) {
-		return &_identifiers.emplace(std::move(name), identifier_info(type_id, index, scope)).first->second;
+	const identifierInfo* identifierLookup::insertIdentifier(std::string name, typeHandle typeID, size_t index, identifierScope scope) {
+		return &_identifiers.emplace(std::move(name), identifierInfo(typeID, index, scope)).first->second;
 	}
 	
-	size_t identifier_lookup::identifiers_size() const {
+	size_t identifierLookup::identifiersSize() const {
 		return _identifiers.size();
 	}
 
-	const identifier_info* identifier_lookup::find(const std::string& name) const {
+	const identifierInfo* identifierLookup::find(const std::string& name) const {
 		if (auto it = _identifiers.find(name); it != _identifiers.end()) {
 			return &it->second;
 		} else {
@@ -36,101 +36,101 @@ namespace cobalt{
 		}
 	}
 	
-	bool identifier_lookup::can_declare(const std::string& name) const {
+	bool identifierLookup::canDeclare(const std::string& name) const {
 		return _identifiers.find(name) == _identifiers.end();
 	}
 	
-	identifier_lookup::~identifier_lookup() {
+	identifierLookup::~identifierLookup() {
 	}
 
-	const identifier_info* global_variable_lookup::create_identifier(std::string name, type_handle type_id) {
-		return insert_identifier(std::move(name), type_id, identifiers_size(), identifier_scope::global_variable);
+	const identifierInfo* globalVariableLookup::createIdentifier(std::string name, typeHandle typeID) {
+		return insertIdentifier(std::move(name), typeID, identifiersSize(), identifierScope::global_variable);
 	}
 
-	local_variable_lookup::local_variable_lookup(std::unique_ptr<local_variable_lookup> parent_lookup) :
+	localVariableLookup::localVariableLookup(std::unique_ptr<localVariableLookup> parent_lookup) :
 		_parent(std::move(parent_lookup)),
 		_next_identifier_index(_parent ? _parent->_next_identifier_index : 1)
 	{
 	}
 	
-	const identifier_info* local_variable_lookup::find(const std::string& name) const {
-		if (const identifier_info* ret = identifier_lookup::find(name)) {
+	const identifierInfo* localVariableLookup::find(const std::string& name) const {
+		if (const identifierInfo* ret = identifierLookup::find(name)) {
 			return ret;
 		} else {
 			return _parent ? _parent->find(name) : nullptr;
 		}
 	}
 
-	const identifier_info* local_variable_lookup::create_identifier(std::string name, type_handle type_id) {
-		return insert_identifier(std::move(name), type_id, _next_identifier_index++, identifier_scope::local_variable);
+	const identifierInfo* localVariableLookup::createIdentifier(std::string name, typeHandle typeID) {
+		return insertIdentifier(std::move(name), typeID, _next_identifier_index++, identifierScope::local_variable);
 	}
 	
-	std::unique_ptr<local_variable_lookup> local_variable_lookup::detach_parent() {
+	std::unique_ptr<localVariableLookup> localVariableLookup::detach_parent() {
 		return std::move(_parent);
 	}
 
-	param_lookup::param_lookup() :
-		local_variable_lookup(nullptr),
+	paramLookup::paramLookup() :
+		localVariableLookup(nullptr),
 		_next_param_index(-1)
 	{
 	}
 	
-	const identifier_info* param_lookup::create_param(std::string name, type_handle type_id) {
-		return insert_identifier(std::move(name), type_id, _next_param_index--, identifier_scope::local_variable);
+	const identifierInfo* paramLookup::createParam(std::string name, typeHandle typeID) {
+		return insertIdentifier(std::move(name), typeID, _next_param_index--, identifierScope::local_variable);
 	}
 	
-	const identifier_info* function_lookup::create_identifier(std::string name, type_handle type_id) {
-		return insert_identifier(std::move(name), type_id, identifiers_size(), identifier_scope::function);
+	const identifierInfo* functionLookup::createIdentifier(std::string name, typeHandle typeID) {
+		return insertIdentifier(std::move(name), typeID, identifiersSize(), identifierScope::function);
 	}
 
-	compiler_context::compiler_context() :
+	compilerContext::compilerContext() :
 		_params(nullptr)
 	{
 	}
 	
-	const type* compiler_context::get_handle(const type& t) {
-		return _types.get_handle(t);
+	const type* compilerContext::getHandle(const type& t) {
+		return _types.getHandle(t);
 	}
 	
-	const identifier_info* compiler_context::find(const std::string& name) const {
+	const identifierInfo* compilerContext::find(const std::string& name) const {
 		if (_locals) {
-			if (const identifier_info* ret = _locals->find(name)) {
+			if (const identifierInfo* ret = _locals->find(name)) {
 				return ret;
 			}
 		}
-		if (const identifier_info* ret = _functions.find(name)) {
+		if (const identifierInfo* ret = _functions.find(name)) {
 			return ret;
 		}
 		return _globals.find(name);
 	}
 	
-	const identifier_info* compiler_context::create_identifier(std::string name, type_handle type_id) {
+	const identifierInfo* compilerContext::createIdentifier(std::string name, typeHandle typeID) {
 		if (_locals) {
-			return _locals->create_identifier(std::move(name), type_id);
+			return _locals->createIdentifier(std::move(name), typeID);
 		} else {
-			return _globals.create_identifier(std::move(name), type_id);
+			return _globals.createIdentifier(std::move(name), typeID);
 		}
 	}
 	
-	const identifier_info* compiler_context::create_param(std::string name, type_handle type_id) {
-		return _params->create_param(name, type_id);
+	const identifierInfo* compilerContext::createParam(std::string name, typeHandle typeID) {
+		return _params->createParam(name, typeID);
 	}
 	
-	const identifier_info* compiler_context::create_function(std::string name, type_handle type_id) {
-		return _functions.create_identifier(name, type_id);
+	const identifierInfo* compilerContext::createFunction(std::string name, typeHandle typeID) {
+		return _functions.createIdentifier(name, typeID);
 	}
 	
-	void compiler_context::enter_scope() {
-		_locals = std::make_unique<local_variable_lookup>(std::move(_locals));
+	void compilerContext::enterScope() {
+		_locals = std::make_unique<localVariableLookup>(std::move(_locals));
 	}
 	
-	void compiler_context::enter_function() {
-		std::unique_ptr<param_lookup> params = std::make_unique<param_lookup>();
+	void compilerContext::enterFunction() {
+		std::unique_ptr<paramLookup> params = std::make_unique<paramLookup>();
 		_params = params.get();
 		_locals = std::move(params);
 	}
 	
-	void compiler_context::leave_scope() {
+	void compilerContext::leaveScope() {
 		if (_params == _locals.get()) {
 			_params = nullptr;
 		}
@@ -138,35 +138,35 @@ namespace cobalt{
 		_locals = _locals->detach_parent();
 	}
 	
-	bool compiler_context::can_declare(const std::string& name) const {
-		return _locals ? _locals->can_declare(name) : (_globals.can_declare(name) && _functions.can_declare(name));
+	bool compilerContext::canDeclare(const std::string& name) const {
+		return _locals ? _locals->canDeclare(name) : (_globals.canDeclare(name) && _functions.canDeclare(name));
 	}
 	
-	compiler_context::scope_raii compiler_context::scope() {
-		return scope_raii(*this);
+	compilerContext::scopeRaii compilerContext::scope() {
+		return scopeRaii(*this);
 	}
 	
-	compiler_context::function_raii compiler_context::function() {
-		return function_raii(*this);
+	compilerContext::functionRaii compilerContext::function() {
+		return functionRaii(*this);
 	}
 	
-	compiler_context::scope_raii::scope_raii(compiler_context& context):
+	compilerContext::scopeRaii::scopeRaii(compilerContext& context):
 		_context(context)
 	{
-		_context.enter_scope();
+		_context.enterScope();
 	}
 	
-	compiler_context::scope_raii::~scope_raii() {
-		_context.leave_scope();
+	compilerContext::scopeRaii::~scopeRaii() {
+		_context.leaveScope();
 	}
 	
-	compiler_context::function_raii::function_raii(compiler_context& context):
+	compilerContext::functionRaii::functionRaii(compilerContext& context):
 		_context(context)
 	{
-		_context.enter_function();
+		_context.enterFunction();
 	}
 	
-	compiler_context::function_raii::~function_raii() {
-		_context.leave_scope();
+	compilerContext::functionRaii::~functionRaii() {
+		_context.leaveScope();
 	}
 }

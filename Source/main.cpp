@@ -10,17 +10,17 @@ int main() {
 	
 	module m;
 	
-	add_standard_functions(m);
+	addStandardFunctions(m);
 	
 	/*
-	m.add_external_function("greater", std::function<number(number, number)>([](number x, number y){
+	m.addExternalFunctions("greater", std::function<number(number, number)>([](number x, number y){
 		return x > y;
 	}));
 	*/
-
-	auto s_main = m.create_public_function_caller<void>("main");
 	
-	if (m.try_load(path.c_str(), &std::cerr)) {
+	auto s_main = m.createPublicFunctionCaller<void>("main");
+	
+	if (m.tryLoad(path.c_str(), &std::cerr)) {
 		s_main();
 	}
 	

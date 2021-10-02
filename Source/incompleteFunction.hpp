@@ -7,32 +7,32 @@
 #include <functional>
 
 namespace cobalt {
-	class compiler_context;
-	class runtime_context;
-	class tokens_iterator;
-	using function = std::function<void(runtime_context&)>;
+	class compilerContext;
+	class runtimeContext;
+	class tokensIterator;
+	using function = std::function<void(runtimeContext&)>;
 
-	struct function_declaration{
+	struct functionDeclaration{
 		std::string name;
-		type_handle type_id;
+		typeHandle typeID;
 		std::vector<std::string> params;
 	};
 	
-	function_declaration parse_function_declaration(compiler_context& ctx, tokens_iterator& it);
+	functionDeclaration parseFunctionDeclaration(compilerContext& ctx, tokensIterator& it);
 
-	class incomplete_function {
+	class incompleteFunction {
 	private:
-		function_declaration _decl;
+		functionDeclaration _decl;
 		std::deque<token> _tokens;
 		size_t _index;
 	public:
-		incomplete_function(compiler_context& ctx, tokens_iterator& it);
+		incompleteFunction(compilerContext& ctx, tokensIterator& it);
 		
-		incomplete_function(incomplete_function&& orig) noexcept;
+		incompleteFunction(incompleteFunction&& orig) noexcept;
 		
-		const function_declaration& get_decl() const;
+		const functionDeclaration& getDecl() const;
 		
-		function compile(compiler_context& ctx);
+		function compile(compilerContext& ctx);
 	};
 }
 

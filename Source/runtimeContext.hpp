@@ -11,26 +11,26 @@
 #include "expression.hpp"
 
 namespace cobalt {
-	class runtime_context {
+	class runtimeContext {
 	private:
 		std::vector<function> _functions;
 		std::unordered_map<std::string, size_t> _public_functions;
 		std::vector<expression<lvalue>::ptr> _initializers;
-		std::vector<variable_ptr> _globals;
-		std::deque<variable_ptr> _stack;
+		std::vector<variablePtr> _globals;
+		std::deque<variablePtr> _stack;
 		size_t _retval_idx;
 		
 		class scope {
 		private:
-			runtime_context& _context;
+			runtimeContext& _context;
 			size_t _stack_size;
 		public:
-			scope(runtime_context& context);
+			scope(runtimeContext& context);
 			~scope();
 		};
 		
 	public:
-		runtime_context(
+		runtimeContext(
 			std::vector<expression<lvalue>::ptr> initializers,
 			std::vector<function> functions,
 			std::unordered_map<std::string, size_t> public_functions
@@ -38,17 +38,17 @@ namespace cobalt {
 	
 		void initialize();
 
-		variable_ptr& global(int idx);
-		variable_ptr& retval();
-		variable_ptr& local(int idx);
+		variablePtr& global(int idx);
+		variablePtr& retval();
+		variablePtr& local(int idx);
 
 		const function& get_function(int idx) const;
 		const function& get_public_function(const char* name) const;
 
-		scope enter_scope();
-		void push(variable_ptr v);
+		scope enterScope();
+		void push(variablePtr v);
 		
-		variable_ptr call(const function& f, std::vector<variable_ptr> params);
+		variablePtr call(const function& f, std::vector<variablePtr> params);
 	};
 }
 

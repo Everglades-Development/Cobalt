@@ -8,7 +8,7 @@
 
 namespace cobalt {
 
-	enum struct node_operation {
+	enum struct nodeOperation {
 		param,
 
 		preinc,
@@ -68,42 +68,42 @@ namespace cobalt {
 	struct node;
 	using node_ptr=std::unique_ptr<node>;
 	
-	using node_value=std::variant<node_operation, std::string, double, identifier>;
+	using nodeValue=std::variant<nodeOperation, std::string, double, identifier>;
 	
-	class compiler_context;
+	class compilerContext;
 	
 	struct node {
 	private:
-		node_value _value;
+		nodeValue _value;
 		std::vector<node_ptr> _children;
-		type_handle _type_id;
+		typeHandle _type_id;
 		bool _lvalue;
 		size_t _line_number;
 		size_t _char_index;
 	public:
-		node(compiler_context& context, node_value value, std::vector<node_ptr> children, size_t line_number, size_t char_index);
+		node(compilerContext& context, nodeValue value, std::vector<node_ptr> children, size_t lineNumber, size_t charIndex);
 		
-		const node_value& get_value() const;
+		const nodeValue& getValue() const;
 		
 		bool is_node_operation() const;
-		bool is_identifier() const;
-		bool is_number() const;
-		bool is_string() const;
+		bool isIdentifier() const;
+		bool isNumber() const;
+		bool isString() const;
 		
-		node_operation get_node_operation() const;
-		std::string_view get_identifier() const;
-		double get_number() const;
-		std::string_view get_string() const;
+		nodeOperation getNodeOperation() const;
+		std::string_view getIdentifier() const;
+		double getNumber() const;
+		std::string_view getString() const;
 
-		const std::vector<node_ptr>& get_children() const;
+		const std::vector<node_ptr>& getChildren() const;
 		
-		type_handle get_type_id() const;
+		typeHandle getTypeID() const;
 		bool is_lvalue() const;
 		
-		size_t get_line_number() const;
-		size_t get_char_index() const;
+		size_t getLineNumber() const;
+		size_t getCharIndex() const;
 		
-		void check_conversion(type_handle type_id, bool lvalue) const;
+		void checkConversion(typeHandle typeID, bool lvalue) const;
 	};
 
 }

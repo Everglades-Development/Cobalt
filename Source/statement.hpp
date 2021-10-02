@@ -17,19 +17,19 @@ namespace cobalt {
 	private:
 		flow_type _type;
 		int _break_level;
-		flow(flow_type type, int break_level);
+		flow(flow_type type, int breakLevel);
 	public:
 		flow_type type() const;
-		int break_level() const;
+		int breakLevel() const;
 		
-		static flow normal_flow();
-		static flow break_flow(int break_level);
-		static flow continue_flow();
-		static flow return_flow();
-		flow consume_break();
+		static flow normalFlow();
+		static flow breakFlow(int breakLevel);
+		static flow continueFlow();
+		static flow returnFlow();
+		flow consumeBreak();
 	};
 	
-	class runtime_context;
+	class runtimeContext;
 	
 	class statement {
 		statement(const statement&) = delete;
@@ -37,35 +37,35 @@ namespace cobalt {
 	protected:
 		statement() = default;
 	public:
-		virtual flow execute(runtime_context& context) = 0;
+		virtual flow execute(runtimeContext& context) = 0;
 		virtual ~statement() = default;
 	};
 	
 	using statement_ptr = std::unique_ptr<statement>;
 	using shared_statement_ptr = std::shared_ptr<statement>;
 	
-	statement_ptr create_simple_statement(expression<void>::ptr expr);
+	statement_ptr createSimpleStatement(expression<void>::ptr expr);
 	
-	statement_ptr create_local_declaration_statement(std::vector<expression<lvalue>::ptr> decls);
+	statement_ptr createLocalDeclarationState(std::vector<expression<lvalue>::ptr> decls);
 	
-	statement_ptr create_block_statement(std::vector<statement_ptr> statements);
-	shared_statement_ptr create_shared_block_statement(std::vector<statement_ptr> statements);
+	statement_ptr createBlockStatement(std::vector<statement_ptr> statements);
+	shared_statement_ptr createSharedBlockStatement(std::vector<statement_ptr> statements);
 	
-	statement_ptr create_break_statement(int break_level);
+	statement_ptr createBreakStatement(int breakLevel);
 	
-	statement_ptr create_continue_statement();
+	statement_ptr createContinueStatement();
 	
-	statement_ptr create_return_statement(expression<lvalue>::ptr expr);
+	statement_ptr createReturnStatement(expression<lvalue>::ptr expr);
 	
-	statement_ptr create_return_void_statement();
+	statement_ptr createReturnVoidStatement();
 	
-	statement_ptr create_if_statement(
+	statement_ptr createIfStatement(
 		std::vector<expression<lvalue>::ptr> decls,
 		std::vector<expression<number>::ptr> exprs,
 		std::vector<statement_ptr> statements
 	);
 	
-	statement_ptr create_switch_statement(
+	statement_ptr createSwitchStatement(
 		std::vector<expression<lvalue>::ptr> decls,
 		expression<number>::ptr expr,
 		std::vector<statement_ptr> statements,
@@ -74,18 +74,18 @@ namespace cobalt {
 	);
 	
 	
-	statement_ptr create_while_statement(expression<number>::ptr expr, statement_ptr statement);
+	statement_ptr createWhileStatement(expression<number>::ptr expr, statement_ptr statement);
 	
-	statement_ptr create_do_statement(expression<number>::ptr expr, statement_ptr statement);
+	statement_ptr createDoStatement(expression<number>::ptr expr, statement_ptr statement);
 	
-	statement_ptr create_for_statement(
+	statement_ptr createForStatement(
 		expression<void>::ptr expr1,
 		expression<number>::ptr expr2,
 		expression<void>::ptr expr3,
 		statement_ptr statement
 	);
 	
-	statement_ptr create_for_statement(
+	statement_ptr createForStatement(
 		std::vector<expression<lvalue>::ptr> decls,
 		expression<number>::ptr expr2,
 		expression<void>::ptr expr3,
